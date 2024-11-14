@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function MCQExamInterface() {
+  const maxQuestionCnt = 6 ; 
   const [timeRemaining, setTimeRemaining] = useState(60 * 15); // 15 minutes in seconds
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [questions, setQuestions] = useState(null);
 
   const location = useLocation();
+  const navigate = useNavigate();
 
 
   useEffect(()=>{
@@ -72,6 +75,11 @@ function MCQExamInterface() {
         subjectID : 4,
         studentID : 1,
         quizID : 1
+      }
+
+      if(currentQuestion === maxQuestionCnt){
+        console.log("max question count reached")
+        navigate("/finish-test")
       }
       axios.post('http://localhost:5000/question',data2)
       .then(response=>{
