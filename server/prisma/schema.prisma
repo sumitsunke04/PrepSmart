@@ -4,6 +4,7 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,6 +19,15 @@ model Subject {
   name       String
   questions  Question[]  // Opposite relation with Question
   quizzes    Quiz[]      // Opposite relation with Quiz
+  topics     Topic[]     // Opposite relation with Topic
+}
+
+model Topic {
+  topic_id      Int      @id @default(autoincrement())
+  topic_name    String
+  sub_id        Int
+  subject       Subject  @relation(fields: [sub_id], references: [sub_id])
+  questions     Question[]  // Opposite relation with Question
 }
 
 model Question {
@@ -26,43 +36,45 @@ model Question {
   level         Int
   sub_id        Int
   subject       Subject  @relation(fields: [sub_id], references: [sub_id])
-  quizQuestions QuizQuestion[]  // Opposite relation
+  topic_id      Int      // Foreign key for Topic
+  topic         Topic    @relation(fields: [topic_id], references: [topic_id])
+  quizQuestions QuizQuestion[]  // Opposite relation with QuizQuestion
   options       Option[]        // Relation with Option
 }
 
 model Option {
-  opt_id     Int        @id @default(autoincrement())
-  text       String
-  is_correct Boolean
-  que_id     Int
-  question   Question   @relation(fields: [que_id], references: [que_id])
+  opt_id        Int        @id @default(autoincrement())
+  text          String
+  is_correct    Boolean
+  que_id        Int
+  question      Question   @relation(fields: [que_id], references: [que_id])
   quizQuestions QuizQuestion[] // Opposite relation with QuizQuestion
 }
 
 model Quiz {
-  quiz_id      Int      @id @default(autoincrement())
-  quiz_name    String
-  sub_id       Int
-  subject      Subject  @relation(fields: [sub_id], references: [sub_id])
-  quizQuestions QuizQuestion[] // Opposite relation
+  quiz_id       Int      @id @default(autoincrement())
+  quiz_name     String
+  sub_id        Int
+  subject       Subject  @relation(fields: [sub_id], references: [sub_id])
+  quizQuestions QuizQuestion[] // Opposite relation with QuizQuestion
 }
 
 model Student {
-  std_id       Int    @id @default(autoincrement())
-  fname        String
-  lname        String
-  username     String @unique
-  quizQuestions QuizQuestion[] // Opposite relation
+  std_id        Int    @id @default(autoincrement())
+  fname         String
+  lname         String
+  username      String @unique
+  quizQuestions QuizQuestion[] // Opposite relation with QuizQuestion
 }
 
 model QuizQuestion {
-  quiz_que_id    Int    @id @default(autoincrement())
-  quiz_id        Int
-  quiz           Quiz    @relation(fields: [quiz_id], references: [quiz_id])
-  que_id         Int
-  question       Question @relation(fields: [que_id], references: [que_id])
-  std_id         Int
-  student        Student @relation(fields: [std_id], references: [std_id])
+  quiz_que_id     Int    @id @default(autoincrement())
+  quiz_id         Int
+  quiz            Quiz    @relation(fields: [quiz_id], references: [quiz_id])
+  que_id          Int
+  question        Question @relation(fields: [que_id], references: [que_id])
+  std_id          Int
+  student         Student @relation(fields: [std_id], references: [std_id])
   selected_opt_id Int
-  option         Option  @relation(fields: [selected_opt_id], references: [opt_id])
+  option          Option  @relation(fields: [selected_opt_id], references: [opt_id])
 }
