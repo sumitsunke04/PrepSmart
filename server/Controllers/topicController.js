@@ -12,12 +12,13 @@ const getTopics = async(req,res)=>{
 
 const getSubjectTopics = async (subjectID) => {
     try {
+        console.log('sub id ',subjectID)
         const topics = await prisma.topic.findMany({
             where: {
                 sub_id: subjectID
             }
         });
-        // console.log('topics inside',topics)
+        console.log('topics inside',topics)
         return topics;
     } catch (err) {
         throw new Error(err.message);  // Throwing error to be handled in the route

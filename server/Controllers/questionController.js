@@ -29,18 +29,19 @@ const getQuestions = async (req, res) => {
 
 const getNextQuestion = async(req,res)=>{
     try{
-        // console.log("in this route/func")
+        console.log("in this route/func")
         const questionNumber = parseInt(req.body.questionNumber);
         const subjectID = parseInt(req.body.subjectID);
         const studentID = parseInt(req.body.studentID);
         const quizID = parseInt(req.body.quizID);
 
-        // console.log(questionNumber,subjectID,studentID,quizID)
+        console.log(questionNumber,subjectID,studentID,quizID)
         //this selects only those questions that are correctly solved by the student in descending order of level
         
 
 
         //calculate topic index then figure out topic id
+        console.log('at stage1')
         const topics = await getSubjectTopics(subjectID);
         const topicIndex = questionNumber%topics.length;
         

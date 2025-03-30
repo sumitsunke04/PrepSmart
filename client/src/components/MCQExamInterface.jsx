@@ -55,7 +55,7 @@ function MCQExamInterface() {
       const data = {
         que_id:currentQuestionData.que_id,
         selected_opt_id:selectedOption.opt_id,
-        subjectID:4,
+        subjectID:subjectID,
         std_id : 1,
         quiz_id : 1
       }
@@ -72,7 +72,7 @@ function MCQExamInterface() {
 
       const data2 = {
         questionNumber:currentQuestion,
-        subjectID : 4,
+        subjectID : subjectID,
         studentID : 1,
         quizID : 1
       }

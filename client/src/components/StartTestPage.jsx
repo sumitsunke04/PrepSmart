@@ -8,9 +8,9 @@ function StartTestPage() {
   const handleStartTest = () => {
     axios.post('http://localhost:5000/question',{
       questionNumber : 0,
-      subjectID : 4,
+      subjectID : 1,
       studentID : 1,
-      quizID : 1
+      quizID : 1  
     }).then(response => {
       console.log('First question:', response.data);
       navigate('/mcq-exam', { state: { question: response.data } });

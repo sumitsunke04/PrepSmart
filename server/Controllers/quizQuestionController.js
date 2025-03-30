@@ -44,7 +44,7 @@ const addQuizQuestion = async(req,res)=>{
     try {
         console.log('inside addition')
         const { quiz_id, que_id, std_id, selected_opt_id } = req.body;
-    
+        
         console.log('body',req.body)
         // Validate input data
         if (!quiz_id || !que_id || !std_id || !selected_opt_id) {
