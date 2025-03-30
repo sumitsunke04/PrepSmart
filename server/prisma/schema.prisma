@@ -67,8 +67,12 @@ model Student {
   fname         String
   lname         String
   username      String @unique
-  quizQuestions QuizQuestion[] // Opposite relation with QuizQuestion
+  email         String?  // Make it optional
+  password      String?  // Make it optional
+  quizQuestions QuizQuestion[]
 }
+
+
 
 model QuizQuestion {
   quiz_que_id     Int    @id @default(autoincrement())
