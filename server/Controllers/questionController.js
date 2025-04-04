@@ -64,7 +64,9 @@ const getNextQuestion = async(req,res)=>{
                 topic_id:topics[topicIndex].topic_id,
                 level:nextLevel,
                 quizQuestions:{
-                    none:{}
+                    none:{
+                        std_id: studentID 
+                    }
                 }
             },
             include: {
