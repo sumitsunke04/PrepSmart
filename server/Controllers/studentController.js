@@ -36,6 +36,7 @@ const register = async(req,res)=>{
 
 const login = async(req,res)=>{
     try{
+        console.log(req.body)
         const {username,password} = req.body;
 
         const existingUser = await prisma.student.findUnique({
@@ -43,20 +44,24 @@ const login = async(req,res)=>{
                 username,
             },
         })
+        console.log('user : ',existingUser)
 
         if(!existingUser){
             return res.status(500).json({msg:"Invalid username"});
         }
 
-        const isMatch = bcrypt.compare(password,existingUser.password);
+        const isMatch = await bcrypt.compare(password,existingUser.password);
 
         if(!isMatch){
             return res.status(500).json({msg:"Invalid password"});
         }
+        console.log('is match', isMatch)
 
         const token = jwt.sign({std_id:existingUser.std_id,username:existingUser.username},process.env.JWT_KEY,{
             expiresIn: "1h",
         })
+
+        console.log('token after login',token)
 
         return res.status(201).json(token);
     }catch(err){

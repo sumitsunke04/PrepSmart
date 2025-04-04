@@ -52,16 +52,25 @@ function MCQExamInterface() {
       const selectedOption = currentQuestionData.options[selectedAnswer];
       const subjectID = currentQuestionData.sub_id;
 
+      let token = localStorage.getItem('token')
+      let studentID = localStorage.getItem('studentID')
+
+      studentID = parseInt(studentID)
       const data = {
         que_id:currentQuestionData.que_id,
         selected_opt_id:selectedOption.opt_id,
         subjectID:subjectID,
-        std_id : 1,
+        std_id : studentID,
         quiz_id : 1
       }
 
+      
+
+      console.log(studentID,' sumit sumit sumit sumit ',token)
       //send data to backend
-      axios.post('http://localhost:5000/submitAnswer',data)
+      axios.post('http://localhost:5000/submitAnswer',data,{headers:{
+        Authorization:`Bearer ${token}`
+      }})
       .then(response=>{
         console.log('Answer submiited successfully',response.data);
 
@@ -73,15 +82,18 @@ function MCQExamInterface() {
       const data2 = {
         questionNumber:currentQuestion,
         subjectID : subjectID,
-        studentID : 1,
+        studentID ,
         quizID : 1
       }
 
+      console.log('data 2',data2)
       if(currentQuestion === maxQuestionCnt){
         console.log("max question count reached")
         navigate("/finish-test")
       }
-      axios.post('http://localhost:5000/question',data2)
+      axios.post('http://localhost:5000/question',data2,{headers:{
+        Authorization:`Bearer ${token}`
+      }})
       .then(response=>{
         console.log('Recieved data successfully',response.data);
         setQuestions(response.data[0]);

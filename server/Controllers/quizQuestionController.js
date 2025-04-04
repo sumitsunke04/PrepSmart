@@ -51,6 +51,7 @@ const addQuizQuestion = async(req,res)=>{
           return res.status(400).json({ error: 'Missing required fields' });
         }
     
+        // std_id = parseInt(std_id)
         console.log('reached here')
         // Create a new QuizQuestion record in the database using Prisma
         const newQuizQuestion = await prisma.quizQuestion.create({

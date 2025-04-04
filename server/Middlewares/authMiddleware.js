@@ -7,26 +7,29 @@
 
 
 
+const jwt = require('jsonwebtoken');
+require("dotenv").config();
 
-// const jwt = require('jsonwebtoken');
-// require("dotenv").config();
+const authenticateStudent = (req, res, next) => {
+  const bearerToken = req.header("Authorization");
+  console.log("Raw Auth Header:", bearerToken);
 
-// const authenticateStudent = (req,res,next)=>{
-//     const token = req.header("Authorization");
+  if (!bearerToken || !bearerToken.startsWith("Bearer ")) {
+    return res.status(401).json({ msg: "Token missing or improperly formatted" });
+  }
 
-//     if(!token){
-//         return res.status(401).json({msg:"token unavailable"})
-//     }
+  const token = bearerToken.split(" ")[1];
+  console.log("Token:", token);
 
-//     try{
-//         const decoded = jwt.verify(token,process.env.JWT_KEY)
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_KEY);
+    console.log("Decoded:", decoded);
+    req.studentID = decoded.std_id;
+    next();
+  } catch (err) {
+    console.error("JWT verification failed:", err.message);
+    return res.status(400).json({ msg: "Invalid token" });
+  }
+};
 
-//         req.studentID = decoded.std_id;
-//         next();
-//     }
-//     catch(err){
-//         return res.status(400).json({msg:"Invalid token"})
-//     }
-// }
-
-// module.exports = {authenticateStudent}
+module.exports = { authenticateStudent };
