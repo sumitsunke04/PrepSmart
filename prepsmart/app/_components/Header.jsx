@@ -1,107 +1,150 @@
-// "use client"
-// import React, { useEffect } from 'react'
-
-// import Image from 'next/image';
-// import { UserButton } from '@clerk/nextjs';
-// import { usePathname, useRouter } from 'next/navigation';
-
-
-// const Header = () => {
-//   const path = usePathname();
-//   const router = useRouter();
-//   useEffect(()=>{
-//     console.log(path);
-//   })
-//   return (
-//     <div className='flex p-4 items-center justify-between bg-[#0F0F0F] shadow-sm'>
-//         {/* <Image src='/logo1.svg' alt="logo" width={ 160 } height={ 100 } /> */}
-//         <a href="/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
-//                             <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="prepSmart Logo" />
-//                             {/* <Image src='/logo1.svg' alt="logo" width={ 160 } height={ 100 } /> */}
-//                             <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">prepSmart</span>
-//                         </a>
-//         <ul className=' hidden md:flex gap-6'>
-//          <li onClick={() => router.replace('/')} className={`hover:text-primary hover:font-bold hover:underline transition-all cursor-pointer ${path=='/dashboard' && 'text-primary font-bold'}`}>Home</li>
-//           <li onClick={() => router.replace('/dashboard')} className={`hover:text-primary hover:font-bold hover:underline transition-all cursor-pointer ${path=='/dashboard' && 'text-primary font-bold'}`}>Dashboard</li>
-//           <li className={`hover:text-primary hover:font-bold hover:underline transition-all cursor-pointer ${path=='/dashboard/questions' && 'text-primary font-bold'}`}>Questions</li>
-//           <li className={`hover:text-primary hover:font-bold hover:underline transition-all cursor-pointer ${path=='/dashboard/upgrade' && 'text-primary font-bold'}`}>Upgrade</li>
-//           <li onClick={() => router.replace('/about')} className={`hover:text-primary hover:font-bold hover:underline transition-all cursor-pointer ${path=='/dashboard/how it works' && 'text-primary font-bold'}`}>How it Works?</li>
-//         </ul>
-//         <UserButton/>
-//     </div>
-//   )
-// }
-
-// export default Header
 "use client";
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { UserButton } from "@clerk/nextjs";
 import { usePathname, useRouter } from "next/navigation";
+import { FiMenu, FiX } from "react-icons/fi";
+import { motion } from "framer-motion";
 
 const Header = () => {
   const path = usePathname();
   const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    console.log(path);
-  });
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navItems = [
+    { name: "Home", path: "/" },
+    { name: "Dashboard", path: "/dashboard" },
+    { name: "Questions", path: "/dashboard/questions" },
+    { name: "About", path: "/about" },
+    { name: "Contact", path: "/contact" },
+  ];
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const navigate = (path) => {
+    router.replace(path);
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <div className="flex p-4 items-center justify-between bg-[#0F0F0F] shadow-sm">
-      <a
-        href="/"
-        className="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse"
-      >
-        <Image src='/logo_update.svg' alt="logo" width={32} height={32} />
-        <span className="self-center text-2xl font-semibold whitespace-nowrap text-white">
-          prepSmart
-        </span>
-      </a>
-      <ul className="hidden md:flex gap-6 text-white">
-        <li
-          onClick={() => router.replace("/")}
-          className={`hover:text-gray-300 hover:font-bold hover:underline transition-all cursor-pointer ${
-            path === "/" && "text-gray-300 font-bold"
-          }`}
+    <header
+      className={`fixed w-full z-50 transition-all duration-300 ${
+        scrolled ? "bg-gray-900/95 backdrop-blur-sm py-2 shadow-lg" : "bg-gray-900 py-4"
+      }`}
+    >
+      <div className="container mx-auto px-4 flex items-center justify-between">
+        {/* Logo */}
+        <motion.a
+          href="/"
+          className="flex items-center space-x-3"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
         >
-          <span className="text-lg">Home</span>
-        </li>
-        <li
-          onClick={() => router.replace("/dashboard")}
-          className={`hover:text-gray-300 hover:font-bold hover:underline transition-all cursor-pointer ${
-            path === "/dashboard" && "text-gray-300 font-bold"
-          }`}
+          <Image src="/logo_update.svg" alt="logo" width={32} height={32} />
+          <div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-white to-yellow-500 bg-clip-text text-transparent">
+              prep
+            </span>
+            <span className="text-yellow-500 font-bold text-2xl">
+              Smart
+            </span>
+          </div>
+          
+        </motion.a>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-8">
+          {navItems.map((item) => (
+            <motion.div
+              key={item.path}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <button
+                onClick={() => navigate(item.path)}
+                className={`text-lg font-medium transition-colors ${
+                  path === item.path
+                    ? "text-blue-400"
+                    : "text-gray-300 hover:text-white"
+                }`}
+              >
+                {item.name}
+                {path === item.path && (
+                  <motion.div
+                    layoutId="navUnderline"
+                    className="h-0.5 bg-blue-400 mt-1"
+                  />
+                )}
+              </button>
+            </motion.div>
+          ))}
+        </nav>
+
+        {/* User Button */}
+        <div className="hidden md:block">
+          <UserButton afterSignOutUrl="/" />
+        </div>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden text-gray-300 focus:outline-none"
+          onClick={toggleMobileMenu}
         >
-          <span className="text-lg">Dashboard</span>
-        </li>
-        <li
-          onClick={() => router.replace("/dashboard/questions")}
-          className={`hover:text-gray-300 hover:font-bold hover:underline transition-all cursor-pointer ${
-            path === "/dashboard/questions" && "text-gray-300 font-bold"
-          }`}
+          {isMobileMenuOpen ? (
+            <FiX size={24} />
+          ) : (
+            <FiMenu size={24} />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{ duration: 0.3 }}
+          className="md:hidden bg-gray-800 shadow-lg"
         >
-          <span className="text-lg">Questions</span>
-        </li>
-        <li
-          onClick={() => router.replace("/about")}
-          className={`hover:text-gray-300 hover:font-bold hover:underline transition-all cursor-pointer ${
-            path === "/about" && "text-gray-300 font-bold"
-          }`}
-        >
-          <span className="text-lg">About</span>
-        </li>
-        <li
-          onClick={() => router.replace("/contact")}
-          className={`hover:text-gray-300 hover:font-bold hover:underline transition-all cursor-pointer ${
-            path === "/contact" && "text-gray-3300 font-bold"
-          }`}
-        >
-          <span className="text-lg">Contact</span>
-        </li>
-      </ul>
-      <UserButton />
-    </div>
+          <div className="container mx-auto px-4 py-4">
+            {navItems.map((item) => (
+              <motion.div
+                key={item.path}
+                whileTap={{ scale: 0.98 }}
+                className="py-3 border-b border-gray-700 last:border-b-0"
+              >
+                <button
+                  onClick={() => navigate(item.path)}
+                  className={`w-full text-left text-lg font-medium ${
+                    path === item.path
+                      ? "text-blue-400"
+                      : "text-gray-300 hover:text-white"
+                  }`}
+                >
+                  {item.name}
+                </button>
+              </motion.div>
+            ))}
+            <div className="pt-4 flex justify-center">
+              <UserButton afterSignOutUrl="/" />
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </header>
   );
 };
 

@@ -207,7 +207,7 @@ const RecordAnswerSection = ({ interviewData, mockInterviewQuestion, activeQuest
 
     return (
         <div className="flex text-gray-700 flex-col justify-center items-center">
-            <Button disabled={loading} variant="outline" className="mt-10 mb-5" onClick={startStopRecording}>
+            <Button disabled={loading} variant="outline" className="mt-5 mb-5" onClick={startStopRecording}>
                 {isRecording ? (
                     <h2 className="text-red-600 animate-pulse flex gap-3">
                         <StopCircle /> Stop Recording....

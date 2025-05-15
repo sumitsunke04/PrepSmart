@@ -1,251 +1,256 @@
 "use client";
-import React, { useEffect } from "react";
-import "../styles/about.css";
+import React from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
 
 const AboutUs = () => {
+  const teamMembers = [
+    {
+      id: 1,
+      name: "Niraj Karande",
+      role: "Full Stack Developer",
+      image: "/assets/niraj_profile.jpg",
+      linkedin: "",
+      instagram: "",
+      facebook: ""
+    },
+    {
+      id: 2,
+      name: "Sarthak Nirgude",
+      role: "Full Stack Developer",
+      image: "/assets/sarthak_profile.jpg",
+      linkedin: "https://www.linkedin.com/in/sarthaknirgude7/",
+      instagram: "https://www.instagram.com/_i_am_srn/",
+      facebook: ""
+    },
+    {
+      id: 3,
+      name: "Sumit Sunke",
+      role: "Full Stack Developer",
+      image: "/assets/updated.png",
+      linkedin: "",
+      instagram: "",
+      facebook: ""
+    },
+    {
+      id: 4,
+      name: "Rushikesh Mane",
+      role: "Full Stack Developer",
+      image: "/assets/updated.png",
+      linkedin: "",
+      instagram: "",
+      facebook: ""
+    }
+  ];
 
-  // useEffect(() => {
-  //   const request = async () => {
-  //     try {
-  //       // Fetch the ZIP file from the public folder or another location
-  //       const response = await fetch("/images.zip"); // Adjust the path as needed
-  //       const zipBlob = await response.blob(); // Convert to Blob
-  
-  //       const formData = new FormData();
-  //       formData.append("zipfile", zipBlob, "interview_snapshots.zip");
-  
-  //       const uploadResponse = await fetch("http://localhost:4000/upload", {
-  //         method: "POST",
-  //         body: formData,
-  //         credentials: "include",
-  //       });
-  
-  //       if (!uploadResponse.ok) {
-  //         throw new Error(`Upload failed: ${uploadResponse.statusText}`);
-  //       }
-  
-  //       const analysisResult = await uploadResponse.json();
-  //       console.log("analysisResult:", analysisResult);
-  //     } catch (error) {
-  //       console.error("Error uploading file:", error);
-  //     }
-  //   };
-  
-  //   request();
-  // }, []);
-  
+  const fadeIn = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   return (
-    // <div className="bg-gray-100 text-gray-900">
-    //   {/* Hero Section */}
-    //   <section className="bg-[#0F0F0F] text-white py-16 text-center">
-    //     <div className="max-w-4xl mx-auto px-6">
-    //       <h1 className="text-4xl font-bold mb-4">About PrepSmart</h1>
-    //       <p className="text-lg">
-    //         Your ultimate platform for interview preparation, combining AI-powered tools with expert guidance to help you land your dream job.
-    //       </p>
-    //     </div>
-    //   </section>
-
-    //   {/* Mission & Vision Section */}
-    //   <section className="max-w-5xl mx-auto px-6 py-16">
-    //     <div className="grid md:grid-cols-2 gap-10">
-    //       <div className="bg-white p-6 shadow-lg rounded-lg">
-    //         <h2 className="text-2xl font-bold mb-4">🎯 Our Mission</h2>
-    //         <p className="text-gray-700">
-    //           We aim to empower job seekers by providing a seamless interview preparation experience with personalized feedback and real-time AI analysis.
-    //         </p>
-    //       </div>
-    //       <div className="bg-white p-6 shadow-lg rounded-lg">
-    //         <h2 className="text-2xl font-bold mb-4">🚀 Our Vision</h2>
-    //         <p className="text-gray-700">
-    //           To be the leading AI-driven interview preparation platform that helps candidates ace their interviews with confidence.
-    //         </p>
-    //       </div>
-    //     </div>
-    //   </section>
-
-    //   {/* Team Section (Optional) */}
-    //   <section className="bg-gray-200 py-16 text-center">
-    //     <div className="max-w-4xl mx-auto px-6">
-    //       <h2 className="text-3xl font-bold mb-6">Meet Our Team</h2>
-    //       <p className="text-lg text-gray-700 mb-10">
-    //         Our team of experts and engineers are dedicated to making interview prep effortless and efficient for you.
-    //       </p>
-    //       <div className="grid md:grid-cols-3 gap-8">
-    //         <div className="bg-white p-6 shadow-lg rounded-lg">
-    //           <h3 className="text-xl font-semibold">John Doe</h3>
-    //           <p className="text-gray-600">CEO & Co-Founder</p>
-    //         </div>
-    //         <div className="bg-white p-6 shadow-lg rounded-lg">
-    //           <h3 className="text-xl font-semibold">Jane Smith</h3>
-    //           <p className="text-gray-600">CTO</p>
-    //         </div>
-    //         <div className="bg-white p-6 shadow-lg rounded-lg">
-    //           <h3 className="text-xl font-semibold">Mark Johnson</h3>
-    //           <p className="text-gray-600">Lead Developer</p>
-    //         </div>
-    //       </div>
-    //     </div>
-    //   </section>
-
-    //   {/* Call to Action */}
-    //   <section className="text-center py-16">
-    //     <h2 className="text-3xl font-bold mb-4">Start Preparing Today!</h2>
-    //     <p className="text-lg text-gray-700 mb-6">
-    //       Join PrepSmart and take your interview skills to the next level.
-    //     </p>
-    //     <a href="/signup" className="bg-[#0F0F0F] text-white px-6 py-3 rounded-lg text-lg hover:bg-gray-800 transition">
-    //       Get Started
-    //     </a>
-    //   </section>
-    // </div>
-    <div>
-      <section id="abt_us">
-        <div id="logo_info">
-          <div id="abt_img">
-            <div id="abt_img_cover">
-              <p id="abt_logo">
-                <img src=""></img>
-                <span id="sp_1">prep</span>
-                <span id="sp_2">Smart</span>
-              </p>
-              <p id="abt_logo_info">
-                Your ultimate AI-powered interview coach, helping you practice smarter, boost confidence, and ace every opportunity with ease!
-              </p>
-            </div>
+    <div className="bg-gray-950 text-white font-poppins overflow-hidden">
+      {/* Hero Section with Parallax Effect */}
+      <section className="relative h-screen min-h-[600px] w-full overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-fixed"
+          style={{ backgroundImage: "url('/assets/backiee-286745-landscape.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 to-gray-950/70" />
+        
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          transition={{ duration: 0.8 }}
+          className="relative z-10 h-full flex flex-col items-center justify-center px-4"
+        >
+          <div className="flex items-center mb-8">
+            <motion.img 
+              src="/logo_update.svg" 
+              alt="PrepSmart Logo"
+              className="w-20 h-20 mr-4"
+              whileHover={{ rotate: 15 }}
+            />
+            <motion.h1 
+              className="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-yellow-400"
+              whileHover={{ scale: 1.05 }}
+            >
+              <span>prep</span>
+              <span className="text-yellow-400 ml-2">Smart</span>
+            </motion.h1>
           </div>
-          <p id="abt_desc" class="pcnt">
+          <motion.p 
+            className="text-white text-xl md:text-2xl font-medium text-center max-w-3xl px-4 leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+          >
+            Your ultimate AI-powered interview coach, helping you practice smarter, boost confidence, and ace every opportunity with ease!
+          </motion.p>
+          
+          <motion.div
+            className="mt-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+          >
+            <Link href="/dashboard">
+              <button className="px-8 py-3 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-yellow-400/20">
+                Start Your Journey
+              </button>
+            </Link>
+            
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* Description Section */}
+      <section className="px-4 py-20 relative">
+        <div className="absolute -top-20 left-0 w-full h-20 bg-gradient-to-b from-transparent to-gray-950 z-0" />
+        <motion.div 
+          className="max-w-6xl mx-auto bg-gray-900/80 backdrop-blur-sm border border-gray-800 p-8 md:p-12 rounded-2xl relative overflow-hidden"
+          initial="hidden"
+          whileInView="visible"
+          variants={fadeIn}
+          viewport={{ once: true }}
+        >
+          <div className="absolute -top-20 -right-20 w-40 h-40 bg-yellow-400 rounded-full filter blur-3xl opacity-10" />
+          <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500 rounded-full filter blur-3xl opacity-10" />
+          <p className="text-gray-300 text-lg md:text-xl text-center leading-relaxed relative z-10">
             "PrepSmart is an advanced online platform designed to help job seekers excel in their interview preparation. Our AI-powered features include real-time facial emotion analysis, personalized feedback, and a curated set of mock interview questions tailored to various industries. We provide an intuitive and structured approach to mastering interviews, ensuring that candidates build confidence, improve their responses, and stand out to recruiters. Whether you're a fresher or an experienced professional, PrepSmart is your go-to solution for landing your dream job. Start your journey today and elevate your interview skills with PrepSmart! 🚀"
           </p>
-        </div>
-        <div id="our_msn">
-          <section className="max-w-5xl">
-            <div className="grid md:grid-cols-2 gap-10">
-              <div className="bg-[#5072A7] p-6 shadow-lg rounded-lg">
-                <h2 className="text-2xl font-bold mb-4">🎯 Our Mission</h2>
-                <p className="text-white italic">
-                  We aim to empower job seekers by providing a seamless
-                  interview preparation experience with personalized feedback
-                  and real-time AI analysis.
-                </p>
+        </motion.div>
+      </section>
+
+      {/* Mission & Vision Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-gray-900 to-gray-950">
+        <div className="max-w-6xl mx-auto">
+          <motion.h2 
+            className="text-3xl md:text-4xl font-bold text-center mb-16"
+            initial="hidden"
+            whileInView="visible"
+            variants={fadeIn}
+            viewport={{ once: true }}
+          >
+            Our <span className="text-yellow-400">Core</span> Values
+          </motion.h2>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            <motion.div 
+              className="bg-gray-900 border border-gray-800 p-8 rounded-2xl hover:border-yellow-400 transition-all duration-300 group"
+              whileHover={{ y: -10 }}
+              initial="hidden"
+              whileInView="visible"
+              variants={fadeIn}
+              viewport={{ once: true }}
+            >
+              <div className="w-16 h-16 bg-yellow-400/10 border border-yellow-400/30 rounded-xl flex items-center justify-center mb-6 group-hover:bg-yellow-400/20 transition-all">
+                <span className="text-3xl">🎯</span>
               </div>
-              <div className="bg-[#5072A7] p-6 shadow-lg rounded-lg">
-                <h2 className="text-2xl font-bold mb-4">🚀 Our Vision</h2>
-                <p className="text-white italic">
-                  To be the leading AI-driven interview preparation platform
-                  that helps candidates ace their interviews with confidence.
-                </p>
+              <h3 className="text-2xl font-bold mb-4">Our Mission</h3>
+              <p className="text-gray-400 leading-relaxed">
+                We aim to empower job seekers by providing a seamless interview preparation experience with personalized feedback and real-time AI analysis.
+              </p>
+            </motion.div>
+            
+            <motion.div 
+              className="bg-gray-900 border border-gray-800 p-8 rounded-2xl hover:border-blue-400 transition-all duration-300 group"
+              whileHover={{ y: -10 }}
+              initial="hidden"
+              whileInView="visible"
+              variants={fadeIn}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="w-16 h-16 bg-blue-400/10 border border-blue-400/30 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-400/20 transition-all">
+                <span className="text-3xl">🚀</span>
               </div>
-            </div>
-          </section>
-        </div>
-        <div id="our_tm">
-          <h2>Our dedicated Team</h2>
-          <p id="team_desc" class="pcnt">
-            Meet the PrepSmart Team, the minds behind our smart and effective interview preparation platform!
-          </p>
-          <div id="team">
-            <div class="mem_img" id="m1"></div>
-            <div id="d1" class="mem_d">
-              <p class="mem_name">Niraj Karande</p>
-              <p class="mem_work">Full Stack Developer</p>
-              <p class="social_med">
-                <ul class="sc_med_ic">
-                  <li>
-                    <a
-                      href=""
-                      class="li_link"
-                    ></a>
-                  </li>
-                  <li>
-                    <a href="" class="in_link"></a>
-                  </li>
-                  <li>
-                    <a href="" class="fb_link"></a>
-                  </li>
-                </ul>
+              <h3 className="text-2xl font-bold mb-4">Our Vision</h3>
+              <p className="text-gray-400 leading-relaxed">
+                To be the leading AI-driven interview preparation platform that helps candidates ace their interviews with confidence.
               </p>
-            </div>
-
-            <div class="mem_img" id="m2"></div>
-            <div id="d2" class="mem_d">
-              <p class="mem_name">Sarthak Nirgude</p>
-              <p class="mem_work">Full Stack Developer</p>
-              <p class="social_med">
-                <ul class="sc_med_ic">
-                  <li>
-                    <a
-                      href="https://www.linkedin.com/in/sarthaknirgude7/"
-                      class="li_link"
-                    ></a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://www.instagram.com/_i_am_srn/"
-                      class="in_link"
-                    ></a>
-                  </li>
-                  <li>
-                    <a
-                      href=""
-                      class="fb_link"
-                    ></a>
-                  </li>
-                </ul>
-              </p>
-            </div>
-
-            <div class="mem_img" id="m3"></div>
-            <div id="d3" class="mem_d">
-              <p class="mem_name">Sumit Sunke</p>
-              <p class="mem_work">Full Stack Developer</p>
-              <p class="social_med">
-                <ul class="sc_med_ic">
-                  <li>
-                    <a
-                      href=""
-                      class="li_link"
-                    ></a>
-                  </li>
-                  <li>
-                    <a
-                      href=""
-                      class="in_link"
-                    ></a>
-                  </li>
-                  <li>
-                    <a href="" class="fb_link"></a>
-                  </li>
-                </ul>
-              </p>
-            </div>
-
-            <div class="mem_img" id="m4"></div>
-            <div id="d4" class="mem_d">
-              <p class="mem_name">Rushikesh Mane</p>
-              <p class="mem_work">Full Stack Developer</p>
-              <p class="social_med">
-                <ul class="sc_med_ic">
-                  <li>
-                    <a href="" class="li_link"></a>
-                  </li>
-                  <li>
-                    <a
-                      href=""
-                      class="in_link"
-                    ></a>
-                  </li>
-                  <li>
-                    <a
-                      href=""
-                      class="fb_link"
-                    ></a>
-                  </li>
-                </ul>
-              </p>
-            </div>
+            </motion.div>
           </div>
         </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="py-16 px-4">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">Our dedicated Team</h2>
+          <p className="text-white italic max-w-2xl mx-auto mb-12">
+            Meet the PrepSmart Team, the minds behind our smart and effective interview preparation platform!
+          </p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {teamMembers.map((member) => (
+              <div key={member.id} className="group relative">
+                <div className="relative z-10 mx-auto w-48 h-48 rounded-full overflow-hidden border-4 border-gray-700 group-hover:opacity-100 opacity-70 transition-opacity duration-300">
+                  <img 
+                    src={member.image} 
+                    alt={member.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-64 mt-52 p-6 bg-white rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+                  <h3 className="text-xl font-semibold text-black">{member.name}</h3>
+                  <p className="text-gray-600">{member.role}</p>
+                  <div className="flex justify-center space-x-4 mt-4">
+                    {member.linkedin && (
+                      <a href={member.linkedin} target="_blank" rel="noopener noreferrer">
+                        <img src="/assets/linkedin.png" alt="LinkedIn" className="w-6 h-6 hover:translate-y-1 transition-transform" />
+                      </a>
+                    )}
+                    {member.instagram && (
+                      <a href={member.instagram} target="_blank" rel="noopener noreferrer">
+                        <img src="/assets/instagram.png" alt="Instagram" className="w-6 h-6 hover:translate-y-1 transition-transform" />
+                      </a>
+                    )}
+                    {member.facebook && (
+                      <a href={member.facebook} target="_blank" rel="noopener noreferrer">
+                        <img src="/assets/facebook.png" alt="Facebook" className="w-6 h-6 hover:translate-y-1 transition-transform" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 bg-gradient-to-r from-gray-900 to-gray-950 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-yellow-400 rounded-full filter blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500 rounded-full filter blur-3xl" />
+        </div>
+        
+        <motion.div 
+          className="max-w-4xl mx-auto text-center relative"
+          initial="hidden"
+          whileInView="visible"
+          variants={fadeIn}
+          viewport={{ once: true }}
+        >
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            Ready to <span className="text-yellow-400">Ace</span> Your Next Interview?
+          </h2>
+          <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+            Join thousands of successful candidates who landed their dream jobs with PrepSmart.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <Link href="/dashboard">
+              <button className="px-8 py-3 bg-yellow-400 hover:bg-yellow-300 text-gray-900 font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg shadow-yellow-400/20">
+                Get Started Now
+              </button>
+            </Link>
+            <button className="px-8 py-3 border border-gray-700 hover:border-yellow-400 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105">
+              Learn More
+            </button>
+          </div>
+        </motion.div>
       </section>
     </div>
   );

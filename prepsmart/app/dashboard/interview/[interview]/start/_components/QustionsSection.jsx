@@ -16,13 +16,6 @@ const QustionsSection = ({ mockInterviewQuestion, activeQuestionIndex }) => {
 
     return (
         <div className='mt-10 p-5 border rounded-lg'>
-            <div className=' grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'>
-                {questions && questions.map((question, index) => (
-                    <div key={index}>
-                        <h2 className={`p-2 border hover:bg-gray-200 rounded-full text-xs md:text-sm text-center cursor-pointer ${activeQuestionIndex==index && 'bg-gray-800 text-white'} `}>Question #{index + 1}</h2>
-                    </div>
-                ))}
-            </div>
             <div>
                 <h2 className=' my-5 text-md md:text-lg'>{questions[activeQuestionIndex]?.question}</h2>
                 <Volume2 className=' cursor-pointer' onClick={()=>textToSpeech(questions[activeQuestionIndex]?.question)}/>

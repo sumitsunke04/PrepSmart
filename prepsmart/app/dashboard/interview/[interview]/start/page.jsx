@@ -6,13 +6,14 @@ import React, { useEffect, useState, useRef, useCallback } from 'react'
 import QustionsSection from './_components/QustionsSection';
 import RecordAnswerSection from './_components/RecordAnswerSection';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Webcam from 'react-webcam';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { useUser } from '@clerk/nextjs';
+import { motion } from 'framer-motion';
+import { FiChevronLeft, FiChevronRight, FiClock, FiCamera } from 'react-icons/fi';
 
 const StartInterview = ({ params }) => {
     const router = useRouter();
@@ -24,6 +25,7 @@ const StartInterview = ({ params }) => {
     const [timerActive, setTimerActive] = useState(true);
     const [snapshots, setSnapshots] = useState([]);
     const [isCapturing, setIsCapturing] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const webcamRef = useRef(null);
     const captureIntervalRef = useRef(null);
@@ -37,26 +39,16 @@ const StartInterview = ({ params }) => {
         }
 
         return () => {
-            // Clean up intervals when component unmounts
-            if (window.timerInterval) {
-                clearInterval(window.timerInterval);
-            }
-            if (captureIntervalRef.current) {
-                clearInterval(captureIntervalRef.current);
-            }
+            if (window.timerInterval) clearInterval(window.timerInterval);
+            if (captureIntervalRef.current) clearInterval(captureIntervalRef.current);
         };
     }, [params.interview]);
 
     const startSnapshotCapture = useCallback(() => {
-        if (captureIntervalRef.current) {
-            clearInterval(captureIntervalRef.current);
-        }
+        if (captureIntervalRef.current) clearInterval(captureIntervalRef.current);
 
         setIsCapturing(true);
-        // Capture every 5 seconds
-        captureIntervalRef.current = setInterval(() => {
-            captureSnapshot();
-        }, 5000);
+        captureIntervalRef.current = setInterval(captureSnapshot, 5000);
     }, []);
 
     const stopSnapshotCapture = useCallback(() => {
@@ -84,7 +76,6 @@ const StartInterview = ({ params }) => {
     }, [activeQuestionIndex]);
 
     const initializeTimer = () => {
-        // Check if there's an existing timer in localStorage
         const storedEndTime = localStorage.getItem(`interviewTimer_${params.interview}`);
         const now = new Date().getTime();
 
@@ -93,28 +84,22 @@ const StartInterview = ({ params }) => {
             if (remaining > 0) {
                 setTimeRemaining(remaining);
                 startTimer(remaining);
-                startSnapshotCapture(); // Start capturing if timer was already running
+                startSnapshotCapture();
             } else {
-                // Time's up, redirect to feedback
                 handleTimeExpired();
             }
         } else {
-            // No existing timer, start a new one
             const endTime = now + DEFAULT_INTERVIEW_DURATION;
             localStorage.setItem(`interviewTimer_${params.interview}`, endTime.toString());
             setTimeRemaining(DEFAULT_INTERVIEW_DURATION);
             startTimer(DEFAULT_INTERVIEW_DURATION);
-            startSnapshotCapture(); // Start capturing for new interview
+            startSnapshotCapture();
         }
     };
 
     const startTimer = (duration) => {
-        // Clear any existing interval
-        if (window.timerInterval) {
-            clearInterval(window.timerInterval);
-        }
+        if (window.timerInterval) clearInterval(window.timerInterval);
 
-        // Set up new interval
         window.timerInterval = setInterval(() => {
             setTimeRemaining(prev => {
                 const newTime = prev - 1000;
@@ -132,16 +117,12 @@ const StartInterview = ({ params }) => {
         const zip = new JSZip();
         const imagesFolder = zip.folder("images");
 
-        // Add each snapshot to the zip
         snapshots.forEach((snapshot, index) => {
-            // Extract base64 data from the screenshot
             const base64Data = snapshot.data.replace(/^data:image\/\w+;base64,/, '');
             imagesFolder.file(`snapshot_${snapshot.questionIndex}_${index}.png`, base64Data, { base64: true });
         });
 
-        // Generate the zip file
-        const content = await zip.generateAsync({ type: "blob" });
-        return content;
+        return await zip.generateAsync({ type: "blob" });
     };
 
     const handleTimeExpired = async () => {
@@ -161,24 +142,14 @@ const StartInterview = ({ params }) => {
                 credentials: 'include'
             });
 
-            if (!uploadResponse.ok) {
-                throw new Error(`Upload failed: ${uploadResponse.statusText}`);
-            }
+            if (!uploadResponse.ok) throw new Error(`Upload failed: ${uploadResponse.statusText}`);
 
             const analysisResult = await uploadResponse.json();
             console.log("Analysis result:", analysisResult);
 
-            const re = await db.select().from(UserAnswer).where(eq(UserAnswer.mockIdRef, params?.interview));
-            console.log('re.................................................................... : ', re);
-            // Update database
-            const result = await db
-                .update(UserAnswer)
-                .set({
-                    emotionFeedback: JSON.stringify(analysisResult)
-                })
+            await db.update(UserAnswer)
+                .set({ emotionFeedback: JSON.stringify(analysisResult) })
                 .where(eq(UserAnswer.mockIdRef, params?.interview));
-
-            console.log("Update result:", result); // Log ORM output
 
         } catch (error) {
             console.error("Error in handleTimeExpired:", error);
@@ -202,77 +173,159 @@ const StartInterview = ({ params }) => {
 
             if (result.length > 0) {
                 setInterviewData(result[0]);
-                const jsonMockResp = await JSON.parse(result[0].jsonMockResp);
-                setInterviewQuestion(jsonMockResp);
-            } else {
-                console.log("No interview data found");
+                setInterviewQuestion(JSON.parse(result[0].jsonMockResp));
             }
         } catch (error) {
             console.error("Error fetching interview details:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-gray-900">
+                <div className="text-center">
+                    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                    <p className="mt-4 text-gray-300">Loading interview session...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div>
-            {/* Timer Display */}
-            <div className="flex justify-center mt-3 z-50">
-                <div className="text-lg bg-transparent border rounded-lg p-4 shadow-lg font-semibold">
-                    Time Remaining: {formatTime(timeRemaining)}
+        <div className="bg-gray-900 mt-28 text-gray-100 min-h-screen p-4 md:p-8">
+            {/* Header Section */}
+            <div className="flex justify-between items-center mb-8">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        Mock Interview Session
+                    </h1>
+                    <p className="text-gray-400">Practice your responses with AI feedback</p>
+                </div>
+
+                {/* Timer Display */}
+                <div className="flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700">
+                    <FiClock className="text-blue-400" />
+                    <span className="font-mono font-medium">
+                        {formatTime(timeRemaining)}
+                    </span>
                 </div>
             </div>
 
-            <div className='mb-8 grid grid-cols-1 md:grid-cols-2 gap-10'>
-                <QustionsSection
-                    mockInterviewQuestion={interviewQuestion}
-                    activeQuestionIndex={activeQuestionIndex}
-                />
-                <div>
-                    <div className="flex flex-col mt-14 justify-center items-center py-10 px-14 rounded-lg bg-black">
-                        <div></div>
-                        <Image
-                            src="/webcam.png"
-                            alt="alt"
-                            width={200}
-                            height={200}
-                            className="absolute"
-                            style={{ display: isCapturing ? 'none' : 'block' }}
-                        />
-                        <Webcam
-                            ref={webcamRef}
-                            audio={false}
-                            screenshotFormat="image/jpeg"
-                            mirrored={true}
-                            style={{
-                                height: 300,
-                                width: '100%',
-                                zIndex: 10,
-                                display: isCapturing ? 'block' : 'none'
-                            }}
-                        />
+            {/* Main Content */}
+            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                {/* Questions Section - Wider Column */}
+                <div className="lg:col-span-3 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-xl font-semibold text-blue-400">
+                            Question {activeQuestionIndex + 1} of {interviewQuestion?.length}
+                        </h2>
+                        <div className="flex space-x-2">
+                            {Array.from({ length: interviewQuestion?.length || 0 }).map((_, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setActiveQuestionIndex(index)}
+                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${index === activeQuestionIndex
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                        }`}
+                                >
+                                    {index + 1}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                    <RecordAnswerSection
-                        interviewData={interviewData}
+
+                    <QustionsSection
                         mockInterviewQuestion={interviewQuestion}
                         activeQuestionIndex={activeQuestionIndex}
                     />
                 </div>
-            </div>
-            <div className='mb-5 gap-7 flex justify-end'>
-                {activeQuestionIndex > 0 && <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}>Previous Question</Button>}
-                {activeQuestionIndex !== (interviewQuestion?.length - 1) && (
-                    <Button onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}>Next Question</Button>
-                )}
-                {activeQuestionIndex === (interviewQuestion?.length - 1) && (
-                    <Button onClick={handleTimeExpired}>
-                        End Interview
-                    </Button>
-                )}
+
+                {/* Recording Section - Narrower Column */}
+                <div className="lg:col-span-2 flex flex-col justify-between space-y-6 ">
+                    <div>
+                        {/* Webcam Feed */}
+                        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-lg font-semibold flex items-center gap-2">
+                                    <FiCamera className="text-blue-400" />
+                                    Video Recording
+                                </h2>
+                                <span className="text-xs bg-blue-900/30 text-blue-400 px-2 py-1 rounded">
+                                    {isCapturing ? 'Recording' : 'Ready'}
+                                </span>
+                            </div>
+
+                            <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
+                                {!isCapturing && (
+                                    <Image
+                                        src="/webcam.png"
+                                        alt="Webcam placeholder"
+                                        width={200}
+                                        height={200}
+                                        className="opacity-30"
+                                    />
+                                )}
+                                <Webcam
+                                    ref={webcamRef}
+                                    audio={false}
+                                    screenshotFormat="image/jpeg"
+                                    mirrored={true}
+                                    className={`w-full h-full object-cover ${!isCapturing ? 'hidden' : 'block'}`}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Answer Recording Section */}
+                        <div className='mt-2'>
+                            <RecordAnswerSection
+                                interviewData={interviewData}
+                                mockInterviewQuestion={interviewQuestion}
+                                activeQuestionIndex={activeQuestionIndex}
+                            />
+                        </div>
+                    </div>
+                    {/* Navigation Controls */}
+                    <div className="mt-8 flex justify-between">
+                        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                            <Button
+                                className={`bg-blue-600 hover:bg-blue-700 ${activeQuestionIndex === 0 ? 'invisible' : ''}`}
+                                onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}
+                            >
+                                <FiChevronLeft className="mr-2" />
+                                Previous Question
+                            </Button>
+                        </motion.div>
+
+                        <div className="flex gap-4">
+                            {activeQuestionIndex !== (interviewQuestion?.length - 1) ? (
+                                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                    <Button
+                                        className="bg-blue-600 hover:bg-blue-700"
+                                        onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}
+                                    >
+                                        Next Question
+                                        <FiChevronRight className="ml-2" />
+                                    </Button>
+                                </motion.div>
+                            ) : (
+                                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                    <Button
+                                        className="bg-red-600 hover:bg-red-700"
+                                        onClick={handleTimeExpired}
+                                    >
+                                        End Interview
+                                    </Button>
+                                </motion.div>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            {/* Debug view (optional) - shows count of captured snapshots */}
-            <div className="mt-4 text-sm text-gray-500">
-                Captured {snapshots.length} snapshots
-            </div>
+
         </div>
     );
 }
