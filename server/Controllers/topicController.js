@@ -37,10 +37,39 @@ const handleGetSubjectTopics = async (req, res) => {
     }
 };
 
+const addTopic = async(req,res)=>{
+    try{
+        const {sub_id,topic_name} = req.body;
 
+        const sub = await prisma.subject.findFirst({
+            where:{
+                sub_id
+            }
+        })
+
+        const topicExist = await prisma.topic.findFirst({
+            where:{
+                topic_name
+            }
+        })
+        if(topicExist) return res.status(401).json({msg:"topic already exist"})
+        if(!sub) return res.status(404).json({msg:`subject with id ${sub_id} doesnt exist`})
+        const newTopic = await prisma.topic.create({
+            data:{
+                sub_id,
+                topic_name
+            }
+        })
+        return res.status(200).json(newTopic)
+    }
+    catch(err){
+        return res.status(501).json({msg:err.msg})
+    }
+}
 
 module.exports = {
     getTopics,
     handleGetSubjectTopics,
-    getSubjectTopics
+    getSubjectTopics,
+    addTopic
 };
