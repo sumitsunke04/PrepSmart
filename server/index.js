@@ -7,6 +7,7 @@ const topicRoutes = require('./Routes/topicRoutes');
 const quizQuestionRoutes = require('./Routes/quizQuestionRoutes')
 const studentRoutes = require('./Routes/studentRoutes')
 const subjectRoutes = require('./Routes/subjectRoutes')
+const quizRoutes = require('./Routes/quizRoutes')
 app.use(cors());
 
 app.use(express.json());
@@ -21,6 +22,7 @@ app.use('/',topicRoutes)
 app.use('/', quizQuestionRoutes)
 app.use('/',studentRoutes)
 app.use('/',subjectRoutes)
+app.use('/',quizRoutes)
 
 // app.get('/api',(req,res)=>{
 //     res.json({message: 'Welcome to the API'})
