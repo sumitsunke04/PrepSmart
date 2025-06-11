@@ -1,88 +1,168 @@
-const prisma = require('../prisma/client');
-const { getCorrectlySolvedQuizQuestion } = require('./quizQuestionController');
-const { getSubjectTopics } = require('./topicController');
+const db = require('../config_neon/db');
+const {
+  Question,
+  Subject,
+  Topic,
+  Option,
+  QuizQuestion,
+} = require("../schema_neon/user.schema");
+const { eq, and, sql, asc, desc, notInArray } = require("drizzle-orm");
+const { getCorrectlySolvedQuizQuestion } = require("./quizQuestionController");
+const { getSubjectTopics } = require("./topicController");
 
 const getQuestions = async (req, res) => {
-    try {
-        const questions = await prisma.question.findMany({
-            include: {
-                subject: {
-                    select: { name: true }
-                },
-                topic: {
-                    select: { topic_name: true }
-                },
-                options: {
-                    select: {
-                        opt_id: true,
-                        text: true,
-                        is_correct: true
-                    }
-                }
-            }
+  try {
+    const questionsRaw = await db.select({
+        que_id: Question.que_id,
+        text: Question.text,
+        level: Question.level,
+        subject_id: Subject.sub_id,
+        subject: Subject.name,
+        topic: Topic.topic_name,
+        opt_id: Option.opt_id,
+        opt_text: Option.text,
+        is_correct: Option.is_correct,
+      })
+      .from(Question)
+      .leftJoin(Subject, eq(Question.sub_id, Subject.sub_id))
+      .leftJoin(Topic, eq(Question.topic_id, Topic.topic_id))
+      .leftJoin(Option, eq(Question.que_id, Option.que_id));
+
+    const groupedQuestions = [];
+
+    questionsRaw.forEach(row => {
+      let existing = groupedQuestions.find(q => q.que_id === row.que_id);
+
+      const option = {
+        opt_id: row.opt_id,
+        text: row.opt_text,
+        is_correct: row.is_correct,
+      };
+
+      if (existing) {
+        existing.options.push(option);
+      } else {
+        groupedQuestions.push({
+          que_id: row.que_id,
+          text: row.text,
+          level: row.level,
+          subject_id: row.subject_id,
+          subject: row.subject,
+          topic: row.topic,
+          options: [option],
         });
-        return res.json(questions);
-    } catch (err) {
-        return res.status(500).json({ msg: err.message });
-    }
+      }
+    });
+
+    console.log('question : ', groupedQuestions);
+    return res.status(200).json(groupedQuestions);
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
 };
 
-const getNextQuestion = async(req,res)=>{
-    try{
-        console.log("in this route/func")
-        const questionNumber = parseInt(req.body.questionNumber);
-        const subjectID = parseInt(req.body.subjectID);
-        const studentID = parseInt(req.body.studentID);
-        const quizID = parseInt(req.body.quizID);
+const getNextQuestion = async (req, res) => {
+  try {
+    const questionNumber = parseInt(req.body.questionNumber);
+    const subjectID = parseInt(req.body.subjectID);
+    const studentID = parseInt(req.body.studentID);
+    const quizID = parseInt(req.body.quizID);
 
-        console.log(questionNumber,subjectID,studentID,quizID)
-        //this selects only those questions that are correctly solved by the student in descending order of level
-        
+    
+    const topics = await getSubjectTopics(subjectID);
+    const topicIndex = questionNumber % topics.length;
+    const topicID = topics[topicIndex].topic_id;
 
+    console.log('ques num : ', questionNumber);
+    console.log('topic id : ', topicID);
+    console.log('student id : ', studentID);
+    console.log('quiz id : ', quizID);
+    console.log('subject id : ', subjectID);
 
-        //calculate topic index then figure out topic id
-        console.log('at stage1')
-        const topics = await getSubjectTopics(subjectID);
-        const topicIndex = questionNumber%topics.length;
-        
-        const correctlyAnsweredQuestions = await getCorrectlySolvedQuizQuestion(studentID,quizID,topics[topicIndex].topic_id);
-        console.log('correct:',correctlyAnsweredQuestions)
-        let nextLevel;
-        if(correctlyAnsweredQuestions.length > 0){
-            nextLevel = Math.min(3,correctlyAnsweredQuestions[0].question.level + 1);
-        }
-        else{
-            nextLevel = 1;
-        }
+    const correctQues = await getCorrectlySolvedQuizQuestion(
+      studentID,
+      quizID,
+      topicID
+    );
 
-        console.log('topics',topics)
-        console.log('topic index',topicIndex)
-        console.log('nx level',nextLevel)
-
-        const questions = await prisma.question.findMany({
-            where:{
-                topic_id:topics[topicIndex].topic_id,
-                level:nextLevel,
-                quizQuestions:{
-                    none:{
-                        std_id: studentID 
-                    }
-                }
-            },
-            include: {
-                subject: { select: { name: true } },
-                topic: { select: { topic_name: true } },
-                options: { select: { opt_id: true, text: true ,is_correct:true} }
-            }
-        })
-        console.log('remaining',questions)
-        return res.status(200).json(questions);
+    console.log('correctQues : ',correctQues)
+    let nextLevel = 1;
+    if (correctQues.length > 0) {
+      nextLevel = Math.min(4, correctQues[0].level + 1);
     }
-    catch(err){
-        return res.status(500).json({ msg: err.message });
-    }
-}
+
+    const attempted = await db
+    .select({ que_id: QuizQuestion.que_id })
+    .from(QuizQuestion)
+    .where(
+        and(
+        eq(QuizQuestion.std_id, studentID),
+        eq(QuizQuestion.quiz_id, quizID)
+        )
+    );
+
+    console.log('attempted', attempted)
+    const attemptedIDs = attempted.map((q) => q.que_id);
+
+    const rawQuestions = await db
+      .select({
+        que_id: Question.que_id,
+        text: Question.text,
+        level: Question.level,
+        subject_id: Subject.sub_id,
+        subject: Subject.name,
+        topic: Topic.topic_name,
+        opt_id: Option.opt_id,
+        opt_text: Option.text,
+        is_correct: Option.is_correct,
+      })
+      .from(Question)
+      .leftJoin(Subject, eq(Question.sub_id, Subject.sub_id))
+      .leftJoin(Topic, eq(Question.topic_id, Topic.topic_id))
+      .leftJoin(Option, eq(Question.que_id, Option.que_id))
+      .where(
+        and(
+          eq(Question.topic_id, topicID),
+          eq(Question.level, nextLevel),
+          attemptedIDs.length > 0
+            ? notInArray(Question.que_id, attemptedIDs)
+            : sql`TRUE`
+        )
+      );
+
+    const groupedQuestions = [];
+
+    rawQuestions.forEach(row => {
+      let existing = groupedQuestions.find(q => q.que_id === row.que_id);
+
+      const option = {
+        opt_id: row.opt_id,
+        text: row.opt_text,
+        is_correct: row.is_correct,
+      };
+
+      if (existing) {
+        existing.options.push(option);
+      } else {
+        groupedQuestions.push({
+          que_id: row.que_id,
+          text: row.text,
+          level: row.level,
+          subject_id: row.subject_id,
+          subject: row.subject,
+          topic: row.topic,
+          options: [option],
+        });
+      }
+    });
+
+    return res.status(200).json(groupedQuestions);
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
+
 module.exports = {
-    getQuestions,
-    getNextQuestion
+  getQuestions,
+  getNextQuestion,
 };

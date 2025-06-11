@@ -25,16 +25,16 @@ function StartTestPage() {
       const payload = JSON.parse(atob(token.split('.')[1]));
       console.log(payload)
       const studentID = payload.std_id;
-      console.log(studentID)
+      console.log('std id',studentID)
       localStorage.setItem('studentID',studentID)
       // Step 2: Start the test
       const questionResponse = await axios.post(
         'http://localhost:5000/question',
         {
           questionNumber: 0,
-          subjectID: 1,   // or let the student select this
+          subjectID: 2,   // or let the student select this
           studentID,
-          quizID: 1,
+          quizID: 2,
         },
         {
           headers: {
@@ -44,6 +44,7 @@ function StartTestPage() {
       );
 
       // Step 3: Navigate to MCQ page with first question
+      // console.log('ques resp',questionResponse)
       navigate('/mcq-exam', { state: { question: questionResponse.data } });
 
     } catch (error) {

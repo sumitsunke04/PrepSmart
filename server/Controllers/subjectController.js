@@ -1,51 +1,55 @@
-const {PrismaClient} = require('@prisma/client')
-const prisma = require('../prisma/client')
+const db = require('../config_neon/db'); // Drizzle DB instance
+const { Subject } = require('../schema_neon/user.schema');
+const { eq } = require('drizzle-orm');
 
-const addSubject = async(req,res) => {
-    try{
-        const {name} = req.body;
-        const existingSubject = await prisma.subject.findFirst({
-            where:{
-                name
-            }
-        })
-        if(existingSubject){
-            return res.status(400).json({msg : "Subject already exists"})
-        }
-        const newSubject = await prisma.subject.create({
-            data:{
-                name:name
-            }
-        })
-        return res.status(201).json(newSubject)
-    }catch(err){
-        return res.status(500).json({msg:err.msg})
-    }
-}
+const addSubject = async (req, res) => {
+  try {
+    const { name } = req.body;
 
-const getAllSubjects = async(req,res)=>{
-    try{
-        const subjects = await prisma.subject.findMany({})
-        return res.status(201).json(subjects)
-    }catch(err){
-        return res.status(500).json({msg:err.msg})
-    }
-}
+    // Check if subject already exists
+    const existingSubject = await db
+      .select()
+      .from(Subject)
+      .where(eq(Subject.name, name));
 
-const getSubject = async(req,res)=>{
-    try{
-        const subId= parseInt(req.params.id);
+    if (existingSubject.length > 0) {
+      return res.status(400).json({ msg: "Subject already exists" });
+    }
 
-        const subject = await prisma.subject.findUnique({
-            where:{
-                sub_id:subId
-            }
-        })
-        if(!subject) return res.status(404).json({msg:"subject doesnt exist"})
-        return res.status(201).json(subject)
+    // Insert new subject
+    const inserted = await db.insert(Subject).values({ name }).returning();
+    return res.status(201).json(inserted[0]);
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
+
+const getAllSubjects = async (req, res) => {
+  try {
+    const subjects = await db.select().from(Subject);
+    return res.status(200).json(subjects);
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
+
+const getSubject = async (req, res) => {
+  try {
+    const subId = parseInt(req.params.id);
+
+    const subject = await db
+      .select()
+      .from(Subject)
+      .where(eq(Subject.sub_id, subId));
+
+    if (!subject.length) {
+      return res.status(404).json({ msg: "Subject doesn't exist" });
     }
-    catch{
-        return res.status(500).json({msg:err.msg})
-    }
-}
-module.exports = {addSubject,getAllSubjects,getSubject}
+
+    return res.status(200).json(subject[0]);
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
+
+module.exports = { addSubject, getAllSubjects, getSubject };

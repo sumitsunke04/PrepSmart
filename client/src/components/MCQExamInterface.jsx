@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 function MCQExamInterface() {
   const maxQuestionCnt = 6 ; 
   const [timeRemaining, setTimeRemaining] = useState(60 * 15); // 15 minutes in seconds
-  const [currentQuestion, setCurrentQuestion] = useState(1);
+  const [currentQuestion, setCurrentQuestion] = useState(2);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [questions, setQuestions] = useState(null);
 
@@ -48,9 +48,10 @@ function MCQExamInterface() {
   const handleNextQuestion = () => {
     if (selectedAnswer !== null) { // Ensure an answer is selected before moving to the next question
 
+      console.log('curr ques data',questions)
       const currentQuestionData = questions;
       const selectedOption = currentQuestionData.options[selectedAnswer];
-      const subjectID = currentQuestionData.sub_id;
+      const subjectID = currentQuestionData.subject_id;
 
       let token = localStorage.getItem('token')
       let studentID = localStorage.getItem('studentID')
@@ -61,12 +62,12 @@ function MCQExamInterface() {
         selected_opt_id:selectedOption.opt_id,
         subjectID:subjectID,
         std_id : studentID,
-        quiz_id : 1
+        quiz_id : 2
       }
 
       
 
-      console.log(studentID,' sumit sumit sumit sumit ',token)
+      console.log(studentID,' sumit sumit sumit sumit ',currentQuestionData)
       //send data to backend
       axios.post('http://localhost:5000/submitAnswer',data,{headers:{
         Authorization:`Bearer ${token}`
@@ -83,7 +84,7 @@ function MCQExamInterface() {
         questionNumber:currentQuestion,
         subjectID : subjectID,
         studentID ,
-        quizID : 1
+        quizID : 2
       }
 
       console.log('data 2',data2)

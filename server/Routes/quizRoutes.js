@@ -1,7 +1,8 @@
-const express = require('express');
-router = express();
-const {getSubjectQuizes} = require('../Controllers/quizController')
+const express = require("express");
+const router = express.Router(); // Use `.Router()` instead of `.express()` for route modules
 
-router.get('/quiz/:subId',getSubjectQuizes)
+const { getSubjectQuizes } = require("../Controllers/quizController");
 
-module.exports = router
+router.get("/quiz/:subId", getSubjectQuizes);
+
+module.exports = router;

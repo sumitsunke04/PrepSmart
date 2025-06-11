@@ -1,80 +1,67 @@
-const prisma = require('../prisma/client');
+const db = require('../config_neon/db');
+const { QuizQuestion, Option, Question } = require("../schema_neon/user.schema");
+const { eq, and, desc } = require("drizzle-orm");
 
-const getCorrectlySolvedQuizQuestion = async(studentID,quizID,topicID)=>{
-    try{
-        // const studentID = parseInt(req.body.studentID);
-        // const quizID = parseInt(req.body.quizID);
+const getCorrectlySolvedQuizQuestion = async (studentID, quizID, topicID) => {
+  try {
 
-        console.log('ids',studentID,quizID)
-        //this selects only those questions that are correctly solved by the student in descending order of level
-        const questions = await prisma.quizQuestion.findMany({
-            where:{
-                std_id:studentID,
-                quiz_id:quizID,
-                question:{
-                    topic_id:topicID,
-                },
-                option: {
-                    is_correct: true  // Filters for only the correctly selected options
-                }
-            },
-            include:{
-                question:{
-                    select:{
-                        que_id:true,
-                        text:true,
-                        level:true
-                    }
-                }
-            },
-            orderBy:{
-                question:{
-                    level:'desc'
-                }
-            }
-        })
-        return questions;
-    }
-    catch(err){
-        return  err.message ;
-    }
-}
+    console.log('studentID',studentID)
+    console.log('quizID',quizID)
+    console.log('topicID',topicID)
 
-const addQuizQuestion = async(req,res)=>{
-    try {
-        console.log('inside addition')
-        const { quiz_id, que_id, std_id, selected_opt_id } = req.body;
+    const questions = await db
+      .select({
+        que_id: Question.que_id,
+        text: Question.text,
+        level: Question.level,
+        topic_id:Question.topic_id
         
-        console.log('body',req.body)
-        // Validate input data
-        if (!quiz_id || !que_id || !std_id || !selected_opt_id) {
-          return res.status(400).json({ error: 'Missing required fields' });
-        }
-    
-        // std_id = parseInt(std_id)
-        console.log('reached here')
-        // Create a new QuizQuestion record in the database using Prisma
-        const newQuizQuestion = await prisma.quizQuestion.create({
-          data: {
-            quiz_id,
-            que_id,
-            std_id,
-            selected_opt_id
-          }
-        });
-    
-        console.log('quiz ques added')
-        // Respond with the created QuizQuestion
-        return res.status(201).json({
-          message: 'QuizQuestion added successfully',
-          quizQuestion: newQuizQuestion
-        });
-      } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'An error occurred while adding the quiz question' });
-      }
-}
+      })
+      .from(QuizQuestion)
+      .innerJoin(Question, eq(QuizQuestion.que_id, Question.que_id))
+      .innerJoin(Option, eq(QuizQuestion.selected_opt_id, Option.opt_id))
+      .where(
+        and(
+          eq(QuizQuestion.std_id, studentID),
+          eq(QuizQuestion.quiz_id, quizID),
+          eq(Question.topic_id, topicID),
+          eq(Option.is_correct, true)
+        )
+      )
+      .orderBy(desc(Question.level));
+
+      console.log('correct solved ques of particular top : ',questions)
+    return questions;
+  } catch (err) {
+    return err.message;
+  }
+};
+
+const addQuizQuestion = async (req, res) => {
+  try {
+    const { quiz_id, que_id, std_id, selected_opt_id } = req.body;
+
+    if (!quiz_id || !que_id || !std_id || !selected_opt_id) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    const result = await db
+      .insert(QuizQuestion)
+      .values({ quiz_id, que_id, std_id, selected_opt_id })
+      .returning();
+
+      console.log('after iinsert',result)
+    return res.status(201).json({
+      message: "QuizQuestion added successfully",
+      quizQuestion: result[0],
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "An error occurred while adding the quiz question" });
+  }
+};
+
 module.exports = {
-    getCorrectlySolvedQuizQuestion,
-    addQuizQuestion
-}
+  getCorrectlySolvedQuizQuestion,
+  addQuizQuestion,
+};

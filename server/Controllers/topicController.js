@@ -1,75 +1,71 @@
-const prisma = require('../prisma/client')
+const db = require('../config_neon/db'); // your drizzle client
+const { Topic, Subject } = require('../schema_neon/user.schema');
+const { eq } = require('drizzle-orm');
 
-const getTopics = async(req,res)=>{
-    try{
-        const topics = await prisma.topic.findMany({})
-        return res.status(200).json(topics);
-    }
-    catch(err){
-        return res.status(500).json({msg:err.msg});
-    }
-}
+const getTopics = async (req, res) => {
+  try {
+    const topics = await db.select().from(Topic);
+    return res.status(200).json(topics);
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
 
 const getSubjectTopics = async (subjectID) => {
-    try {
-        console.log('sub id ',subjectID)
-        const topics = await prisma.topic.findMany({
-            where: {
-                sub_id: subjectID
-            }
-        });
-        console.log('topics inside',topics)
-        return topics;
-    } catch (err) {
-        throw new Error(err.message);  // Throwing error to be handled in the route
-    }
+  try {
+    const topics = await db
+      .select()
+      .from(Topic)
+      .where(eq(Topic.sub_id, subjectID));
+    return topics;
+  } catch (err) {
+    throw new Error(err.message);
+  }
 };
 
 const handleGetSubjectTopics = async (req, res) => {
-    try {
-        const subjectID = parseInt(req.params.subjectID);
-
-        const topics = await getSubjectTopics(subjectID);
-
-        return res.status(200).json(topics);
-    } catch (err) {
-        return res.status(500).json({ msg: err.message });
-    }
+  try {
+    const subjectID = parseInt(req.params.subjectID);
+    const topics = await getSubjectTopics(subjectID);
+    return res.status(200).json(topics);
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
 };
 
-const addTopic = async(req,res)=>{
-    try{
-        const {sub_id,topic_name} = req.body;
+const addTopic = async (req, res) => {
+  try {
+    const { sub_id, topic_name } = req.body;
 
-        const sub = await prisma.subject.findFirst({
-            where:{
-                sub_id
-            }
-        })
+    const subjectExists = await db
+      .select()
+      .from(Subject)
+      .where(eq(Subject.sub_id, sub_id));
 
-        const topicExist = await prisma.topic.findFirst({
-            where:{
-                topic_name
-            }
-        })
-        if(topicExist) return res.status(401).json({msg:"topic already exist"})
-        if(!sub) return res.status(404).json({msg:`subject with id ${sub_id} doesnt exist`})
-        const newTopic = await prisma.topic.create({
-            data:{
-                sub_id,
-                topic_name
-            }
-        })
-        return res.status(200).json(newTopic)
+    if (subjectExists.length === 0) {
+      return res.status(404).json({ msg: `Subject with ID ${sub_id} doesn't exist` });
     }
-    catch(err){
-        return res.status(501).json({msg:err.msg})
+
+    const topicExists = await db
+      .select()
+      .from(Topic)
+      .where(eq(Topic.topic_name, topic_name));
+
+    if (topicExists.length > 0) {
+      return res.status(401).json({ msg: 'Topic already exists' });
     }
-}
+
+    const newTopic = await db.insert(Topic).values({ sub_id, topic_name }).returning();
+
+    return res.status(200).json(newTopic[0]);
+  } catch (err) {
+    return res.status(500).json({ msg: err.message });
+  }
+};
 
 module.exports = {
-    getTopics,
-    handleGetSubjectTopics,
-    getSubjectTopics,
-    addTopic
+  getTopics,
+  getSubjectTopics,
+  handleGetSubjectTopics,
+  addTopic,
 };

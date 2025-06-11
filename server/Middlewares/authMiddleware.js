@@ -19,11 +19,11 @@ const authenticateStudent = (req, res, next) => {
   }
 
   const token = bearerToken.split(" ")[1];
-  console.log("Token:", token);
+  // console.log("Token:", token);
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_KEY);
-    console.log("Decoded:", decoded);
+    // console.log("Decoded:", decoded);
     req.studentID = decoded.std_id;
     next();
   } catch (err) {
