@@ -74,7 +74,7 @@ const Quiz = pgTable("quiz", {
 
 // ✅ Student Table
 const Student = pgTable("student", {
-  std_id: serial("std_id").primaryKey(),
+  std_id: text("std_id").primaryKey(),
   fname: text("fname").notNull(),
   lname: text("lname").notNull(),
   username: varchar("username").notNull(),
@@ -87,7 +87,7 @@ const QuizQuestion = pgTable("quiz_question", {
   quiz_que_id: serial("quiz_que_id").primaryKey(),
   quiz_id: integer("quiz_id").notNull().references(() => Quiz.quiz_id),
   que_id: integer("que_id").notNull().references(() => Question.que_id),
-  std_id: integer("std_id").notNull().references(() => Student.std_id),
+  std_id: text("std_id").notNull(),
   selected_opt_id: integer("selected_opt_id").notNull().references(() => Option.opt_id),
 });
 

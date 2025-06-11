@@ -61,7 +61,25 @@ const addQuizQuestion = async (req, res) => {
   }
 };
 
+// const getFeedback = async(req,res)=>{
+//   try{
+//     const {std_id, quiz_id} = req.body;
+//     const attempted = await db.select({
+//       quiz_id,
+//       que_id,
+//       selected_opt_id
+//     }).where({
+//       std_id: std_id,
+//       quiz_id: quiz_id
+//     })
+//   }
+//   catch(err){
+//     return res.status(500).json({msg:err.msg})
+//   }
+// }
+
 module.exports = {
   getCorrectlySolvedQuizQuestion,
   addQuizQuestion,
+  // getFeedback
 };

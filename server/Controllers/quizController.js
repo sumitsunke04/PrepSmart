@@ -14,4 +14,19 @@ const getSubjectQuizes = async (req, res) => {
   }
 };
 
-module.exports = { getSubjectQuizes };
+const addQuiz = async(req,res)=>{
+  try{
+    const {quiz_name,sub_id} = req.body;
+    
+    const newQuiz = await db.insert(Quiz).values({
+      quiz_name,
+      sub_id,
+    }).returning();
+    console.log(newQuiz)
+    return res.status(200).json(newQuiz);
+  }
+  catch(err){
+    return res.status(500).json({ msg: err.message });
+  }
+}
+module.exports = { getSubjectQuizes ,addQuiz};
