@@ -4,23 +4,22 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useAuth, useUser } from '@clerk/nextjs';
 import toast from 'react-hot-toast';
+import { Clock, ChevronRight, Check, BookOpen } from 'lucide-react';
 import '../../../styles/load.css';
 
 export default function QuizPage() {
     const params = useParams();
     const { getToken } = useAuth();
-    const { user } = useUser(); // Clerk user info
+    const { user } = useUser();
     const router = useRouter();
-    
+
     const [questions, setQuestions] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [selectedOptions, setSelectedOptions] = useState({});
     const [timeLeft, setTimeLeft] = useState(60 * 15); // 15 minutes
     const [isLoading, setIsLoading] = useState(true);
     const quizId = params.test;
-   console.log("quiz",quizId);
-   console.log("user",user);
-    // Fetch first question
+
     useEffect(() => {
         const fetchQuestions = async () => {
             try {
@@ -38,23 +37,20 @@ export default function QuizPage() {
                         studentID: user?.id
                     })
                 });
-                console.log("respone -->>",res);
-                if (!res.ok) throw new Error('Failed to load questions');
 
+                if (!res.ok) throw new Error('Failed to load questions');
                 const data = await res.json();
                 setQuestions([data[0]]);
             } catch (err) {
                 toast.error(err.message || 'Failed to load quiz');
-                // router.push('/assessments');
             } finally {
                 setIsLoading(false);
             }
         };
 
         if (user?.id) fetchQuestions();
-    }, [quizId,user]);
+    }, [quizId, user]);
 
-    // Timer logic
     useEffect(() => {
         const timer = timeLeft > 0 && setInterval(() => {
             setTimeLeft(prev => prev - 1);
@@ -143,12 +139,11 @@ export default function QuizPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    std_id:user?.id,
+                    std_id: user?.id,
                     quiz_id: quizId
                 })
             });
 
-            // router.push(`/questions/${quizId}/results`);
             router.push(`/questions/results`);
         } catch (err) {
             toast.error('Error submitting quiz');
@@ -156,58 +151,138 @@ export default function QuizPage() {
         }
     };
 
-    if (isLoading || !questions.length) {
-      return (
-          <div className="flex flex-col items-center justify-center h-screen bg-[#111827] space-y-4">
-              <div className="bounce-loader">
-                  <div></div>
-                  <div></div>
-                  <div></div>
-              </div>
-              <p className="text-gray-700 text-lg">Loading quiz...</p>
-          </div>
-    );
-}
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    };
 
+    if (isLoading || !questions.length) {
+        return (
+            <div className="min-h-screen from-slate-900 via-slate-800 to-slate-900 flex flex-col items-center justify-center space-y-6">
+                <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 text-center">
+                    <div className="bounce-loader mb-4">
+                        <div></div>
+                        <div></div>
+                        <div></div>
+                    </div>
+                    <p className="text-slate-300 text-lg font-medium">Loading your assessment...</p>
+                    <p className="text-slate-400 text-sm mt-2">Please wait while we prepare your questions</p>
+                </div>
+            </div>
+        );
+    }
 
     const currentQuestion = questions[currentIndex];
+    const progress = ((currentIndex + 1) / 6) * 100;
 
     return (
-        <div className="max-w-3xl mx-auto p-6">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-2xl font-bold">Mock Test</h1>
-                <div className="text-xl">
-                    Time Left: {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, '0')}
+        <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
+            {/* Header Section - Left */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-4 flex-1 md:max-w-sm">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-xl">
+                            <BookOpen className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl font-bold text-white">MOCK INTERVIEW</h1>
+                            <p className="text-slate-400 text-sm">Technical Assessment</p>
+                        </div>
+                    </div>
+                    <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm
+                        ${timeLeft < 300 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'}`}>
+                        <Clock className="w-4 h-4" />
+                        {formatTime(timeLeft)}
+                    </div>
+                </div>
+
+                <div className="mt-6">
+                    <div className="flex justify-between text-sm text-slate-400 mb-2">
+                        <span>Progress</span>
+                        <span>{currentIndex + 1} of 6</span>
+                    </div>
+                    <div className="w-full bg-slate-700 rounded-full h-2">
+                        <div
+                            className="bg-gradient-to-r from-blue-500 to-purple-600 h-2 rounded-full transition-all duration-500 ease-out"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-[#111827] rounded-lg shadow p-6">
-                <div className="mb-4">Question {currentIndex + 1} of 6</div>
-
-                <h2 className="text-xl font-semibold mb-6">{currentQuestion.text}</h2>
+            {/* Question Card - Right */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-8 shadow-2xl flex-1">
+                <div className="mb-6">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-slate-700/50 text-slate-300 text-sm mb-4">
+                        Question {currentIndex + 1}
+                    </div>
+                    <h2 className="text-2xl font-semibold text-white leading-relaxed">
+                        {currentQuestion.text}
+                    </h2>
+                </div>
 
                 <div className="space-y-3 mb-8">
-                    {currentQuestion.options.map(option => (
-                        <button
-                            key={option.opt_id}
-                            className={`w-full text-left p-4 rounded-lg border ${selectedOptions[currentQuestion.que_id] === option.opt_id
-                                    ? 'border-blue-500 bg-blue-600'
-                                    : 'border-gray-200 hover:bg-blue-500'
-                                }`}
-                            onClick={() => handleOptionSelect(currentQuestion.que_id, option.opt_id)}
-                        >
-                            {option.text}
-                        </button>
-                    ))}
+                    {currentQuestion.options.map((option, index) => {
+                        const isSelected = selectedOptions[currentQuestion.que_id] === option.opt_id;
+                        const optionLabel = String.fromCharCode(65 + index); // A, B, C, D
+
+                        return (
+                            <button
+                                key={option.opt_id}
+                                onClick={() => handleOptionSelect(currentQuestion.que_id, option.opt_id)}
+                                className={`w-full text-left p-4 rounded-xl border transition-all duration-200 group
+                                    ${isSelected
+                                        ? 'border-blue-500 bg-blue-500/10 text-white shadow-lg shadow-blue-500/20'
+                                        : 'border-slate-600 text-slate-300 hover:bg-white/5 hover:border-slate-500 hover:text-white'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-4">
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-semibold transition-all
+                                        ${isSelected
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-slate-700 text-slate-400 group-hover:bg-slate-600'
+                                        }`}>
+                                        {isSelected ? <Check className="w-4 h-4" /> : optionLabel}
+                                    </div>
+                                    <span className="font-medium">{option.text}</span>
+                                </div>
+                            </button>
+                        );
+                    })}
                 </div>
 
                 <button
                     onClick={handleNext}
-                    disabled={!selectedOptions[currentQuestion.que_id]}
-                    className="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-red-500"
+                    disabled={!selectedOptions[currentQuestion.que_id] || isLoading}
+                    className={`w-full py-4 text-lg font-semibold rounded-xl transition-all duration-200 flex items-center justify-center gap-2
+                        ${!selectedOptions[currentQuestion.que_id] || isLoading
+                            ? 'bg-slate-700 cursor-not-allowed text-slate-500'
+                            : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02]'
+                        }`}
                 >
-                    {currentIndex < 5 ? 'Next Question' : 'Submit Test'}
+                    {isLoading ? (
+                        <>
+                            <div className="w-5 h-5 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></div>
+                            Loading...
+                        </>
+                    ) : currentIndex < 5 ? (
+                        <>
+                            Next Question
+                            <ChevronRight className="w-5 h-5" />
+                        </>
+                    ) : (
+                        <>
+                            <Check className="w-5 h-5" />
+                            Submit Assessment
+                        </>
+                    )}
                 </button>
+
+                {/* Footer */}
+                <div className="text-center mt-8 text-slate-400 text-sm">
+                    <p>Take your time and read each question carefully</p>
+                </div>
             </div>
         </div>
     );
