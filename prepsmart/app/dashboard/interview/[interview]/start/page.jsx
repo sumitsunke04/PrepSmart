@@ -26,6 +26,7 @@ const StartInterview = ({ params }) => {
     const [snapshots, setSnapshots] = useState([]);
     const [isCapturing, setIsCapturing] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const webcamRef = useRef(null);
     const captureIntervalRef = useRef(null);
@@ -195,137 +196,136 @@ const StartInterview = ({ params }) => {
 
     return (
         <div className="bg-gray-900 mt-28 text-gray-100 min-h-screen p-4 md:p-8">
-            {/* Header Section */}
-            <div className="flex justify-between items-center mb-8">
-                <div>
-                    <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                        Mock Interview Session
-                    </h1>
-                    <p className="text-gray-400">Practice your responses with AI feedback</p>
-                </div>
-
-                {/* Timer Display */}
-                <div className="flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700">
-                    <FiClock className="text-blue-400" />
-                    <span className="font-mono font-medium">
-                        {formatTime(timeRemaining)}
-                    </span>
-                </div>
-            </div>
-
-            {/* Main Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                {/* Questions Section - Wider Column */}
-                <div className="lg:col-span-3 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-semibold text-blue-400">
-                            Question {activeQuestionIndex + 1} of {interviewQuestion?.length}
-                        </h2>
-                        <div className="flex space-x-2">
-                            {Array.from({ length: interviewQuestion?.length || 0 }).map((_, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setActiveQuestionIndex(index)}
-                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${index === activeQuestionIndex
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                                        }`}
-                                >
-                                    {index + 1}
-                                </button>
-                            ))}
-                        </div>
+            <div>
+                {/* Header Section */}
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                            Mock Interview Session
+                        </h1>
+                        <p className="text-gray-400">Practice your responses with AI feedback</p>
                     </div>
 
-                    <QustionsSection
-                        mockInterviewQuestion={interviewQuestion}
-                        activeQuestionIndex={activeQuestionIndex}
-                    />
+                    {/* Timer Display */}
+                    <div className="flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700">
+                        <FiClock className="text-blue-400" />
+                        <span className="font-mono font-medium">
+                            {formatTime(timeRemaining)}
+                        </span>
+                    </div>
                 </div>
 
-                {/* Recording Section - Narrower Column */}
-                <div className="lg:col-span-2 flex flex-col justify-between space-y-6 ">
-                    <div>
-                        {/* Webcam Feed */}
-                        <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-lg font-semibold flex items-center gap-2">
-                                    <FiCamera className="text-blue-400" />
-                                    Video Recording
-                                </h2>
-                                <span className="text-xs bg-blue-900/30 text-blue-400 px-2 py-1 rounded">
-                                    {isCapturing ? 'Recording' : 'Ready'}
-                                </span>
+                {/* Main Content */}
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                    {/* Questions Section - Wider Column */}
+                    <div className="lg:col-span-3 bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-semibold text-blue-400">
+                                Question {activeQuestionIndex + 1} of {interviewQuestion?.length}
+                            </h2>
+                            <div className="flex space-x-2">
+                                {Array.from({ length: interviewQuestion?.length || 0 }).map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setActiveQuestionIndex(index)}
+                                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${index === activeQuestionIndex
+                                            ? 'bg-blue-600 text-white'
+                                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                                            }`}
+                                    >
+                                        {index + 1}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <QustionsSection
+                            mockInterviewQuestion={interviewQuestion}
+                            activeQuestionIndex={activeQuestionIndex}
+                        />
+                    </div>
+                    {/* Recording Section - Narrower Column */}
+                    <div className="lg:col-span-2 flex flex-col justify-between space-y-6 ">
+                        <div>
+                            {/* Webcam Feed */}
+                            <div className="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                                        <FiCamera className="text-blue-400" />
+                                        Video Recording
+                                    </h2>
+                                    <span className="text-xs bg-blue-900/30 text-blue-400 px-2 py-1 rounded">
+                                        {isCapturing ? 'Recording' : 'Ready'}
+                                    </span>
+                                </div>
+
+                                <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
+                                    {!isCapturing && (
+                                        <Image
+                                            src="/webcam.png"
+                                            alt="Webcam placeholder"
+                                            width={200}
+                                            height={200}
+                                            className="opacity-30"
+                                        />
+                                    )}
+                                    <Webcam
+                                        ref={webcamRef}
+                                        audio={false}
+                                        screenshotFormat="image/jpeg"
+                                        mirrored={true}
+                                        className={`w-full h-full object-cover ${!isCapturing ? 'hidden' : 'block'}`}
+                                    />
+                                </div>
                             </div>
 
-                            <div className="relative aspect-video bg-black rounded-lg overflow-hidden flex items-center justify-center">
-                                {!isCapturing && (
-                                    <Image
-                                        src="/webcam.png"
-                                        alt="Webcam placeholder"
-                                        width={200}
-                                        height={200}
-                                        className="opacity-30"
-                                    />
-                                )}
-                                <Webcam
-                                    ref={webcamRef}
-                                    audio={false}
-                                    screenshotFormat="image/jpeg"
-                                    mirrored={true}
-                                    className={`w-full h-full object-cover ${!isCapturing ? 'hidden' : 'block'}`}
+                            {/* Answer Recording Section */}
+                            <div className='mt-2'>
+                                <RecordAnswerSection
+                                    interviewData={interviewData}
+                                    mockInterviewQuestion={interviewQuestion}
+                                    activeQuestionIndex={activeQuestionIndex}
                                 />
                             </div>
                         </div>
+                        {/* Navigation Controls */}
+                        <div className="mt-8 flex justify-between">
+                            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                <Button
+                                    className={`bg-blue-600 hover:bg-blue-700 ${activeQuestionIndex === 0 ? 'invisible' : ''}`}
+                                    onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}
+                                >
+                                    <FiChevronLeft className="mr-2" />
+                                    Previous Question
+                                </Button>
+                            </motion.div>
 
-                        {/* Answer Recording Section */}
-                        <div className='mt-2'>
-                            <RecordAnswerSection
-                                interviewData={interviewData}
-                                mockInterviewQuestion={interviewQuestion}
-                                activeQuestionIndex={activeQuestionIndex}
-                            />
-                        </div>
-                    </div>
-                    {/* Navigation Controls */}
-                    <div className="mt-8 flex justify-between">
-                        <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                            <Button
-                                className={`bg-blue-600 hover:bg-blue-700 ${activeQuestionIndex === 0 ? 'invisible' : ''}`}
-                                onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}
-                            >
-                                <FiChevronLeft className="mr-2" />
-                                Previous Question
-                            </Button>
-                        </motion.div>
-
-                        <div className="flex gap-4">
-                            {activeQuestionIndex !== (interviewQuestion?.length - 1) ? (
-                                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                                    <Button
-                                        className="bg-blue-600 hover:bg-blue-700"
-                                        onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}
-                                    >
-                                        Next Question
-                                        <FiChevronRight className="ml-2" />
-                                    </Button>
-                                </motion.div>
-                            ) : (
-                                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                                    <Button
-                                        className="bg-red-600 hover:bg-red-700"
-                                        onClick={handleTimeExpired}
-                                    >
-                                        End Interview
-                                    </Button>
-                                </motion.div>
-                            )}
+                            <div className="flex gap-4">
+                                {activeQuestionIndex !== (interviewQuestion?.length - 1) ? (
+                                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                        <Button
+                                            className="bg-blue-600 hover:bg-blue-700"
+                                            onClick={() => setActiveQuestionIndex(activeQuestionIndex + 1)}
+                                        >
+                                            Next Question
+                                            <FiChevronRight className="ml-2" />
+                                        </Button>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                                        <Button
+                                            className="bg-red-600 hover:bg-red-700"
+                                            onClick={handleTimeExpired}
+                                        >
+                                            End Interview
+                                        </Button>
+                                    </motion.div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-
         </div>
     );
 }

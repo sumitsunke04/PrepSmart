@@ -11,7 +11,7 @@ const AboutUs = () => {
       role: "Full Stack Developer",
       image: "/assets/niraj_profile.jpg",
       linkedin: "",
-      instagram: "",
+      instagram: "https://www.instagram.com/niraj070707/",
       facebook: ""
     },
     {
@@ -27,7 +27,7 @@ const AboutUs = () => {
       id: 3,
       name: "Sumit Sunke",
       role: "Full Stack Developer",
-      image: "/assets/updated.png",
+      image: "/assets/sumit_profile.jpg",
       linkedin: "",
       instagram: "",
       facebook: ""
@@ -36,7 +36,7 @@ const AboutUs = () => {
       id: 4,
       name: "Rushikesh Mane",
       role: "Full Stack Developer",
-      image: "/assets/updated.png",
+      image: "/assets/rushikesh_profile.jpg",
       linkedin: "",
       instagram: "",
       facebook: ""
