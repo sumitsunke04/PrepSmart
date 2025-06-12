@@ -70,6 +70,7 @@ const Quiz = pgTable("quiz", {
   quiz_id: serial("quiz_id").primaryKey(),
   quiz_name: text("quiz_name").notNull(),
   sub_id: integer("sub_id").notNull().references(() => Subject.sub_id),
+  std_id:text("std_id").notNull(),
 });
 
 // ✅ Student Table

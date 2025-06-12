@@ -5,6 +5,7 @@ const {
   Topic,
   Option,
   QuizQuestion,
+  Quiz,
 } = require("../schema_neon/user.schema");
 const { eq, and, sql, asc, desc, notInArray } = require("drizzle-orm");
 const { getCorrectlySolvedQuizQuestion } = require("./quizQuestionController");
@@ -63,11 +64,27 @@ const getQuestions = async (req, res) => {
 
 const getNextQuestion = async (req, res) => {
   try {
+    console.log('here')
     const questionNumber = parseInt(req.body.questionNumber);
-    const subjectID = parseInt(req.body.subjectID);
-    const studentID = parseInt(req.body.studentID);
+    // const subjectID = parseInt(req.body.subjectID);
+    const studentID = req.body.studentID;
     const quizID = parseInt(req.body.quizID);
 
+    console.log(req.body)
+    const quiz = await db.select({
+      quiz_id:Quiz.quiz_id,
+      sub_id:Quiz.sub_id,
+      std_id:Quiz.std_id
+    })
+    .from(Quiz)
+    .where(
+      eq(Quiz.quiz_id, quizID)
+    )
+
+    const subjectID = quiz[0].sub_id
+    // console.log('sub id',subjectID)
+    // console.log('studentID',studentID)
+    // console.log('quiz id',quizID)
     
     const topics = await getSubjectTopics(subjectID);
     const topicIndex = questionNumber % topics.length;
@@ -158,6 +175,7 @@ const getNextQuestion = async (req, res) => {
 
     return res.status(200).json(groupedQuestions);
   } catch (err) {
+    console.log('in error')
     return res.status(500).json({ msg: err.message });
   }
 };

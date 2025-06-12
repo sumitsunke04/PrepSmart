@@ -16,11 +16,12 @@ const getSubjectQuizes = async (req, res) => {
 
 const addQuiz = async(req,res)=>{
   try{
-    const {quiz_name,sub_id} = req.body;
+    const {quiz_name,sub_id,std_id} = req.body;
     
     const newQuiz = await db.insert(Quiz).values({
       quiz_name,
       sub_id,
+      std_id,
     }).returning();
     console.log(newQuiz)
     return res.status(200).json(newQuiz);
