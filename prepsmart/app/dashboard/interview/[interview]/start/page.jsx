@@ -129,7 +129,7 @@ const StartInterview = ({ params }) => {
     const handleTimeExpired = async () => {
         stopSnapshotCapture();
         setTimerActive(false);
-
+        setIsSubmitting(true);
         try {
             const zipBlob = await createSnapshotZip();
             saveAs(zipBlob, `interview_snapshots_${params.interview}.zip`);
@@ -196,7 +196,7 @@ const StartInterview = ({ params }) => {
 
     return (
         <div className="bg-gray-900 mt-28 text-gray-100 min-h-screen p-4 md:p-8">
-            <div>
+            {!isSubmitting ? (<div>
                 {/* Header Section */}
                 <div className="flex justify-between items-center mb-8">
                     <div>
@@ -325,7 +325,15 @@ const StartInterview = ({ params }) => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>) : (
+                <div className="flex items-center justify-center h-screen bg-gray-900">
+                    <div className="text-center">
+                        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                        <p className="mt-4 text-gray-300">Submitting your interview...</p>
+                    </div>
+                </div>
+            )}
+            
         </div>
     );
 }

@@ -7,6 +7,6 @@ const {
 } = require("../Controllers/questionController");
 const { authenticateStudent } = require("../Middlewares/authMiddleware");
 
-router.post("/question", authenticateStudent, getNextQuestion);
+router.post("/question", getNextQuestion);
 
 module.exports = router;

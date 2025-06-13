@@ -1,21 +1,21 @@
 const db = require('../config_neon/db');
-const { QuizQuestion, Option, Question,Topic } = require("../schema_neon/user.schema");
-const { eq, and, desc ,sql} = require("drizzle-orm");
+const { QuizQuestion, Option, Question, Topic } = require("../schema_neon/user.schema");
+const { eq, and, desc, sql } = require("drizzle-orm");
 
 const getCorrectlySolvedQuizQuestion = async (studentID, quizID, topicID) => {
   try {
 
-    console.log('studentID',studentID)
-    console.log('quizID',quizID)
-    console.log('topicID',topicID)
+    console.log('studentID', studentID)
+    console.log('quizID', quizID)
+    console.log('topicID', topicID)
 
     const questions = await db
       .select({
         que_id: Question.que_id,
         text: Question.text,
         level: Question.level,
-        topic_id:Question.topic_id
-        
+        topic_id: Question.topic_id
+
       })
       .from(QuizQuestion)
       .innerJoin(Question, eq(QuizQuestion.que_id, Question.que_id))
@@ -30,7 +30,7 @@ const getCorrectlySolvedQuizQuestion = async (studentID, quizID, topicID) => {
       )
       .orderBy(desc(Question.level));
 
-      console.log('correct solved ques of particular top : ',questions)
+    console.log('correct solved ques of particular top : ', questions)
     return questions;
   } catch (err) {
     return err.message;
@@ -50,7 +50,7 @@ const addQuizQuestion = async (req, res) => {
       .values({ quiz_id, que_id, std_id, selected_opt_id })
       .returning();
 
-      console.log('after iinsert',result)
+    console.log('after iinsert', result)
     return res.status(201).json({
       message: "QuizQuestion added successfully",
       quizQuestion: result[0],
@@ -61,10 +61,10 @@ const addQuizQuestion = async (req, res) => {
   }
 };
 
-const getTestDetails = async(std_id,quiz_id)=>{
+const getTestDetails = async (std_id, quiz_id) => {
   try {
-    
-
+    console.log('std_id', std_id)
+    console.log('quiz_id', quiz_id)
     // Get all attempted quiz questions by std_id
     const attempted = await db
       .select({
@@ -81,6 +81,7 @@ const getTestDetails = async(std_id,quiz_id)=>{
         eq(QuizQuestion.quiz_id, quiz_id)
       ));
 
+    console.log('attempted', attempted)
     // For each question, fetch the correct option separately
     const feedbackWithCorrectOptions = await Promise.all(
       attempted.map(async (attempt) => {
@@ -113,20 +114,26 @@ const getTestDetails = async(std_id,quiz_id)=>{
 
     return feedbackWithCorrectOptions;
   } catch (err) {
+    console.error('Error fetching test details:', err);
     return { msg: err.message };
   }
 }
 const getFeedback = async (req, res) => {
-  try{
+  try {
     const { std_id, quiz_id } = req.body;
-    const feedback = await getTestDetails(std_id, quiz_id);
-    console.log(feedback)
-    return res.status(200).json(feedback)
-  }
-  catch(err){
-    return res.status(400).json({ msg: "Invalid request" });
-  }
+    console.log('Received request for:', { std_id, quiz_id });
 
+    if (!std_id || !quiz_id) {
+      return res.status(400).json({ msg: "Missing student ID or quiz ID" });
+    }
+
+    const feedback = await getTestDetails(std_id, quiz_id);
+    return res.status(200).json(feedback);
+  }
+  catch (err) {
+    console.error('Error in getFeedback:', err);
+    return res.status(500).json({ msg: "Server error" });
+  }
 };
 
 

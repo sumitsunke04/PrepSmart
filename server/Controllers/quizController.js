@@ -14,19 +14,43 @@ const getSubjectQuizes = async (req, res) => {
   }
 };
 
-const addQuiz = async(req,res)=>{
-  try{
-    const {quiz_name,sub_id} = req.body;
+// const addQuiz = async(req,res)=>{
+//   try{
+//     const {quiz_name,sub_id} = req.body;
     
+//     const newQuiz = await db.insert(Quiz).values({
+//       quiz_name,
+//       sub_id,
+//     }).returning();
+//     console.log(newQuiz)
+//     return res.status(200).json(newQuiz);
+//   }
+//   catch(err){
+//     return res.status(500).json({ msg: err.message });
+//   }
+// }
+
+const addQuiz = async (req, res) => {
+  try {
+    const { quiz_name, sub_id, std_id } = req.body;
+    
+    // Add validation
+    if (!quiz_name || !sub_id || !std_id) {
+      return res.status(400).json({ msg: 'Quiz name, subject ID, and student ID are required' });
+    }
+
     const newQuiz = await db.insert(Quiz).values({
       quiz_name,
       sub_id,
+      std_id, // Add student ID to the quiz
+      created_at: new Date() // Optional: add creation timestamp
     }).returning();
-    console.log(newQuiz)
+    
     return res.status(200).json(newQuiz);
-  }
-  catch(err){
+  } catch (err) {
+    console.error('Error adding quiz:', err);
     return res.status(500).json({ msg: err.message });
   }
 }
+
 module.exports = { getSubjectQuizes ,addQuiz};
