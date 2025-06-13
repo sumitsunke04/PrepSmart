@@ -30,18 +30,18 @@ app.use('/',quizRoutes)
 
 
 
-// const db = require('./config_neon/db');
-// const {
-//     Subject,
-//     Topic,
-//     Question,
-//     Option,
-//     Quiz,
-//     Student
-//   } = require('./schema_neon/user.schema');
+const db = require('./config_neon/db');
+const {
+    Subject,
+    Topic,
+    Question,
+    Option,
+    Quiz,
+    Student
+  } = require('./schema_neon/user.schema');
   
 
-//   app.post('/seed-database', async (req, res) => {
+//   app.post('/seed-dbms-database', async (req, res) => {
 //     try {
 //       // 1️⃣ Insert Subject
 //       const [createdSubject] = await db.insert(Subject).values({
@@ -182,6 +182,101 @@ app.use('/',quizRoutes)
 //     }
 //   });
   
+// app.post('/seed-os-database', async (req, res) => {
+//   try {
+//     const subjectId = 3; // Operating Systems
+//     const topicId = 6;   // Multithreading
+//     const level = 5;
+
+//     const questionsWithOptions = [
+//       {
+//         text: "What is thread starvation?",
+//         options: [
+//           "Thread denied CPU access",
+//           "Thread runs continuously",
+//           "Thread spawns other threads",
+//           "Thread sleeps forever",
+//         ]
+//       },
+//       {
+//         text: "How does priority inversion occur?",
+//         options: [
+//           "Low thread blocks high",
+//           "High thread ignores lock",
+//           "Mutex creates new thread",
+//           "Scheduler swaps priorities",
+//         ]
+//       },
+//       {
+//         text: "What is deadlock prevention?",
+//         options: [
+//           "Avoids circular wait condition",
+//           "Ensures fair thread pool",
+//           "Reduces memory overhead",
+//           "Eliminates context switch",
+//         ]
+//       },
+//       {
+//         text: "What is fine-grained locking?",
+//         options: [
+//           "Locks small code parts",
+//           "Locks all shared memory",
+//           "Delays all thread calls",
+//           "Yields after blocking",
+//         ]
+//       },
+//       {
+//         text: "What is lock-free programming?",
+//         options: [
+//           "Avoids using locks",
+//           "Blocks all access",
+//           "Waits for resources",
+//           "Uses mutex always",
+//         ]
+//       },
+//     ];
+
+//     const insertedQuestions = [];
+
+//     for (const q of questionsWithOptions) {
+//       const [insertedQuestion] = await db.insert(Question).values({
+//         text: q.text,
+//         level,
+//         sub_id: subjectId,
+//         topic_id: topicId,
+//       }).returning({ que_id: Question.que_id });
+
+//       const que_id = insertedQuestion.que_id;
+
+//       const optionsToInsert = q.options.map((optionText, index) => ({
+//         text: optionText,
+//         is_correct: index === 0,
+//         que_id,
+//       }));
+
+//       await db.insert(Option).values(optionsToInsert);
+//       insertedQuestions.push({ que_id, text: q.text });
+//     }
+
+//     return res.status(200).json({
+//       message: "Seeded Multithreading Level 5 questions successfully.",
+//       questions: insertedQuestions
+//     });
+//   } catch (err) {
+//     console.error("❌ Seeding failed:", err);
+//     return res.status(500).json({ error: "Seeding failed for Multithreading Level 5." });
+//   }
+// });
+
+
+
+
+
+
+
+
+
+
 
 
 const PORT = process.env.PORT || 5000;

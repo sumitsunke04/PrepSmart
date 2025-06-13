@@ -8,5 +8,5 @@ const {
 const { authenticateStudent } = require("../Middlewares/authMiddleware");
 
 router.get("/question", getNextQuestion);
-
+router.get('/getAllQuestions',getQuestions)
 module.exports = router;
